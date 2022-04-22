@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('header') %>
+
+  <body>
+    <div id="app" class="container p-5 d-flex flex-column justify-content-center" style="height: 100%">
+      <div class="row m-5">
+        <div class="col-7 d-flex flex-column justify-content-center align-items-center shadow"
+          style="border-radius: 1.5rem 0 0 1.5rem; padding: 12rem 8rem; background: hsl(0, 0%, 96%)">
+          <h1 class="fw-bold mb-2" style="color: #991728; white-space: nowrap;">Restaurant Manager</h1>
+          <p class="mb-5" style="font-size: .8em">contact us <a class="text"
+              style="color: #ffa723">three_layers_pils@gmail.co.th</a></p>
+          <form action="/admin/tables" method="POST" class="w-100 needs-validation">
+            <div class="input-group mb-4">
+              <span class="input-group-text px-4 py-3 bg-light" :class="{'border-danger text-danger': error}">
+                <i class="fas fa-user"></i>
+              </span>
+              <input class="form-control ps-4 py-3" :class="{'border-danger text-danger': error}" type="text"
+                placeholder="Username" v-model="username" onfocus="this.style.border = '1px solid #ccd4dc'"
+                @focus="error = false" required>
+            </div>
+            <div class="input-group mb-5">
+              <span class="input-group-text px-4 py-3 bg-light" :class="{'border-danger text-danger': error}">
+                <i class="fas fa-lock"></i>
+              </span>
+              <input class="form-control ps-4 py-3" :class="{'border-danger text-danger': error}"
+                type="password" placeholder="Password" v-model="password"
+                onfocus="this.style.border = '1px solid #ccd4dc'" @focus="error = false" required>
+            </div>
+            <div class="input-group mb-5 d-flex justify-content-center">
+              <input class="btn text-light px-5 py-2 fw-bold" style="background: #991728" type="submit" value="LOGIN">
+            </div>
+          </form>
+        </div>
+        <div class="col-5 p-5 shadow d-flex flex-column justify-content-center"
+          style="background: #991728; border-radius: 0 1.5rem 1.5rem 0; padding: 12rem 8rem">
+          <h3 class="display-5 text-light mb-2">Three Layers Pill</h3>
+          <p class="text-light mb-4" style="opacity: .6">A web-site for restaurant manager, publish as a non-public
+            web-site only the employee in company can login and access this site.</p>
+          <p class="text-light" style="opacity: .8">since 2022</p>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        username: '',
+        password: '',
+        error: JSON.parse(`<%- error %>`)
+      },
+      created() {
+        document.getElementById('app').style.height = window.innerHeight + 'px'
+
+        window.onresize = () => {
+          document.getElementById('app').style.height = window.innerHeight + 'px'
+        }
+      }
+    })
+  </script>
+
+</html>
