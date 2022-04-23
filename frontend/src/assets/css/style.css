@@ -3,6 +3,7 @@ body {
   scroll-behavior: smooth;
   margin: 0;
   background: hsl(50, 10%, 95%);
+  overflow: hidden
 }
 
 .text-theme-1 {
@@ -94,6 +95,17 @@ body {
   transition: .3s;
 }
 
+.edit-image {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: end;
+  padding: .5rem;
+  background: linear-gradient(0deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%);
+}
+
 @keyframes show {
   from {
     width: 0%;
@@ -111,6 +123,12 @@ body {
 
   to {
     width: 0%;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  body {
+    overflow: initial
   }
 }
 

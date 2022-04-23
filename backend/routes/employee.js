@@ -4,16 +4,7 @@ const SQL = require('../public/js/sql.class')
 
 router = express.Router()
 
-async function checkPath(req, res, next) {
-  var data = req.query.data
-  if (data === 'hee') {
-    return res.send('failed')
-  }
-
-  next()
-}
-
-router.get('/menus', checkPath, async (req, res) => {
+router.get('/menus', async (req, res) => {
   var menus = await SQL.getMenus()
 
   res.json({ menus: menus })
@@ -202,4 +193,15 @@ router.put('/menu/:menuId', async (req, res) => {
 })
 
 router.delete('/menu/:menuId', async (req, res) => {
-  const [rows1, fields1] = await pool.que
+  const [rows1, fields1] = await pool.query(
+    `UPDATE menu
+    SET menu_status = NULL
+    WHERE menu_id = ?`,
+    [req.params.menuId]
+  )
+
+  res.send('success')
+})
+
+
+exports.router = router

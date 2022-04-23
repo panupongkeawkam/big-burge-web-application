@@ -8,17 +8,18 @@
 // import HelloWorld from './components/HelloWorld.vue'
 
 export default {
-  name: "App"
+  name: "App",
 };
 </script>
 
-<style>
+<style scoped>
 @import url("assets/css/style.css");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
 
 #app {
   font-family: "Inter", sans-serif;
   background: hsl(50, 10%, 95%);
+  padding: 0;
   /* font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

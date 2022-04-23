@@ -11,9 +11,14 @@ const routes = [
   },
   {
     path: '/manager/tables',
-    name: 'Manager',
+    name: 'Tables',
     component: () => import('../views/employee/TablesPage.vue')
   },
+  {
+    path: '/manager/menus',
+    name: 'Menus',
+    component: () => import('../views/employee/MenusPage.vue')
+  }
 ]
 
 const router = new VueRouter({
