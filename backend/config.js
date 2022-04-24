@@ -4,7 +4,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '628495',
-  database: 'dbsc',
+  database: 'restaurant-management-web-application',
   waitForConnections: true
 })
 

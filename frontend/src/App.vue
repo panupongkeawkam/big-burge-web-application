@@ -5,10 +5,8 @@
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: "App",
+  name: "App"
 };
 </script>
 
@@ -20,11 +18,6 @@ export default {
   font-family: "Inter", sans-serif;
   background: hsl(50, 10%, 95%);
   padding: 0;
-  /* font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px; */
+  transform-origin: top left;
 }
 </style>

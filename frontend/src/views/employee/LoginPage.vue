@@ -1,29 +1,16 @@
 <template>
-  <div
-    ref="container"
-    class="container d-flex flex-column justify-content-center"
-  >
+  <div ref="container" class="container d-flex flex-column justify-content-center">
     <div class="row" style="height: 85% !important">
       <div
-        class="
-          col-7
-          d-flex
-          flex-column
-          justify-content-center
-          align-items-center
-          shadow
-          bg-theme-5
-        "
+        class="col-7 d-flex flex-column justify-content-center align-items-center shadow bg-theme-5"
         style="
           border-radius: 1.5rem 0 0 1.5rem;
         "
       >
-        <h1 class="fw-bold mb-2 text-theme-2" style="white-space: nowrap">
-          Restaurant Manager
-        </h1>
+        <h1 class="fw-bold mb-2 text-theme-2" style="white-space: nowrap">Restaurant Manager</h1>
         <p class="mb-5" style="font-size: 0.8em">
           contact us
-          <a class="text text-theme-6">somemail@gmail.co.th</a>
+          <a class="text text-theme-6">63070132@it.kmitl.ac.th</a>
         </p>
         <div class="input-group mb-4" style="width: 60%">
           <span
@@ -77,36 +64,47 @@
           padding: 12rem 8rem;
         "
       >
-        <h3 class="display-5 text-light mb-2">Three Layers Pill</h3>
+        <h3 class="display-5 text-light mb-2">Describe</h3>
         <p class="text-light mb-4" style="opacity: 0.6">
           A web-site for restaurant manager, publish as a non-public web-site
           only the employee in company can login and access this site.
         </p>
-        <p class="text-light" style="opacity: 0.8">since 2022</p>
+        <p class="text-light" style="opacity: 0.8">since 2022 @it.kmitl</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-// import axios from "axios"
+import axios from "axios";
 
 export default {
   data() {
     return {
       error: false,
+      username: "",
+      password: "",
     };
   },
   methods: {
     login() {
-      window.location.href = "/manager/tables";
+      axios
+        .post("http://localhost:3000/manager/login", {
+          username: this.username,
+          password: this.password,
+        })
+        .then()
+        .catch((err) => {
+          console.log(err);
+        });
+      this.$router.push("/manager/tables");
     },
   },
   mounted() {
-    this.$refs['container'].style.height = window.innerHeight + "px";
+    this.$refs["container"].style.height = window.innerHeight + "px";
 
     window.onresize = () => {
-      this.$refs['container'].style.height = window.innerHeight + "px";
+      this.$refs["container"].style.height = window.innerHeight + "px";
     };
   },
 };
