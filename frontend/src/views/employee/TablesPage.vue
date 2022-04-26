@@ -358,16 +358,8 @@ export default {
     axios
       .get("http://localhost:3000/tables")
       .then((res) => {
-        this.tables = res.data.tables;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    axios
-      .get("http://localhost:3000/menus")
-      .then((res) => {
-        this.menus = res.data.menus;
+        console.log(res)
+        this.tables = res.data;
       })
       .catch((err) => {
         console.log(err);

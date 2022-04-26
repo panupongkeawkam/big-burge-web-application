@@ -6,16 +6,17 @@
 
 <script>
 export default {
-  name: "App"
+  name: "App",
 };
 </script>
 
 <style scoped>
 @import url("assets/css/style.css");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"); */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap');
 
 #app {
-  font-family: "Inter", sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   background: hsl(50, 10%, 95%);
   padding: 0;
   transform-origin: top left;

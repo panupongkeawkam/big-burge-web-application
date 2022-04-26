@@ -23,7 +23,31 @@ const routes = [
     path: '/manager/profile',
     name: 'ManagerProfile',
     component: () => import('../views/employee/ProfilePage.vue')
-  }
+  },
+  {
+    path: '/table/:tableId/home',
+    component: () => import('../views/customer/HomePage.vue')
+  },
+  {
+    path: '/table/:tableId/menu',
+    component: () => import('../views/customer/MenuPage.vue')
+  },
+  {
+    path: '/table/:tableId/order',
+    component: () => import('../views/customer/OrderPage.vue')
+  },
+  {
+    path: '/table/:tableId/waiting',
+    component: () => import('../views/customer/WaitingPage.vue')
+  },
+  {
+    path: '/table/:tableId/served',
+    component: () => import('../views/customer/ServedPage.vue')
+  },
+  {
+    path: '/completed',
+    component: () => import('../views/customer/CompletedPage.vue')
+  },
 ]
 
 const router = new VueRouter({

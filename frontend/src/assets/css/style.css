@@ -69,16 +69,18 @@ body {
 .number-notification {
   position: absolute;
   font-size: 10px;
-  background: #0075ff;
+  line-height: 0px;
+  background: #dc3545;
   color: white;
-  width: 20px;
+  min-width: 20px;
   height: 20px;
+  padding: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 50%;
-  top: -30%;
-  right: -80%;
+  border-radius: 10px;
+  top: -35%;
+  right: -40%;
 }
 
 .payment-active:active {
@@ -92,11 +94,7 @@ body {
 
 .btn.active, .btn:active {
   opacity: .9;
-}
-
-.btn.hover, .btn:hover {
-  transform: scale(1.01);
-  transition: .3s;
+  transform: scale(.99);
 }
 
 .edit-image {
@@ -108,6 +106,15 @@ body {
   align-items: end;
   padding: .5rem;
   background: linear-gradient(0deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%);
+}
+
+.line-limit-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* number of lines to show */
+          line-clamp: 2; 
+  -webkit-box-orient: vertical;
 }
 
 @keyframes show {
@@ -129,6 +136,28 @@ body {
     width: 0%;
   }
 }
+
+
+@keyframes slide-down {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: scaleY(1);
+  }
+
+  to {
+    transform: scaleY(0);
+  }
+}
+
 
 @media screen and (max-width: 992px) {
   body {

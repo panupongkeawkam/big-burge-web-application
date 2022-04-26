@@ -1,10 +1,10 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const app = express()
 const cors = require('cors')
 
 app.use(express.static('public'))
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(express.json()) // for parsing application/json !important
+app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded !important
 app.use(cors())
 
 const customerRouter = require('./routes/customer')

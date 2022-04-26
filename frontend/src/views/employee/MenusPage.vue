@@ -25,7 +25,7 @@
               </div>
               <div class="my-3 clickable">
                 <router-link to="/manager/profile">
-                <i class="fas fa-user text-light"></i>
+                  <i class="fas fa-user text-light"></i>
                 </router-link>
               </div>
             </div>
@@ -370,48 +370,23 @@ export default {
   },
   created() {
     axios
-      .get("http://localhost:3000/tables")
-      .then((res) => {
-        this.tables = res.data.tables;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-
-    axios
       .get("http://localhost:3000/menus")
       .then((res) => {
-        this.menus = res.data.menus;
+        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
   },
   mounted() {
-    // var screenHeight = screen.height > 1080 ? screen.height : 1080;
     var currentHeight = window.innerHeight;
     this.$refs["container"].style.height = currentHeight + "px";
     this.$refs["mainCanvas"].style.height = `calc(${currentHeight}px - 3rem)`;
-
-    // this.$refs["container"].style.transformOrigin = "top";
-    // this.$refs["container"].style.minWidth = screen.width * 0.7 + "px";
-
-    // if (screen.height > 1080) {
-    //   return;
-    // }
-
-    // var currentHeight = window.innerHeight;
-    // this.$refs["container"].style.transform = `scale(${
-    //   currentHeight / screenHeight
-    // })`;
 
     window.onresize = () => {
       currentHeight = window.innerHeight;
       this.$refs["container"].style.height = currentHeight + "px";
       this.$refs["mainCanvas"].style.height = `calc(${currentHeight}px - 3rem)`;
-      // this.$refs["container"].style.transform = `scale(${
-      //   currentHeight / screenHeight
-      // })`;
     };
   },
 };
