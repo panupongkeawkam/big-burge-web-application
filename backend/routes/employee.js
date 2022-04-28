@@ -5,7 +5,7 @@ router = express.Router()
 
 function formatDate(dateFormat) {
   var datetime = new Date(dateFormat)
-  var date = `${datetime.getFullYear()}/${(datetime.getMonth() + 1000).toString().slice(2)}/${(datetime.getDate() + 1000).toString().slice(2)}`
+  var date = `${datetime.getFullYear()}/${((datetime.getMonth() + 1) + 1000).toString().slice(2)}/${(datetime.getDate() + 1000).toString().slice(2)}`
   var time = `${(datetime.getHours() + 1000).toString().slice(2)}:${(datetime.getMinutes() + 1000).toString().slice(2)}:${(datetime.getSeconds() + 1000).toString().slice(2)}`
   dateFormat = `${datetime.getDate() === new Date().getDate() ? 'To Day' : date} ${time}`
   return dateFormat;
@@ -14,7 +14,7 @@ function formatDate(dateFormat) {
 // employee login
 router.post('/manager/login', async (req, res) => {
   var body = req.body
-  res.send()
+  res.status(200).send()
 })
 
 // get all menu
@@ -24,14 +24,14 @@ router.get('/menus', async (req, res) => {
   await conn.beginTransaction()
   try {
     const [menu, filed] = await conn.query(
-      `SELECT menu_name, menu_price, member_price, image_file_path FROM menu WHERE menu_status != 'deleted'`
+      `SELECT * FROM menu WHERE menu_status != 'deleted'`
     )
     await conn.commit()
     res.json({ menus: menu })
   }
   catch (err) {
     await conn.rollback();
-    return res.status(500).json(err);
+    res.status(500).send(err);
   }
   finally {
     conn.release();
@@ -56,6 +56,19 @@ router.get('/tables', async (req, res) => {
       WHERE \`status\` != 'completed'`
     )
 
+    const [customer, field3] = await conn.query(
+      `SELECT concat(fname, ' ', lname) AS \`full_name\`, serviced_id, table_id
+      FROM serviced_customer
+      JOIN customer_member
+      USING (account_id)
+      JOIN \`account\`
+      USING (account_id)
+      JOIN \`order\`
+      USING (serviced_id)
+      JOIN \`table\`
+      USING (table_id)`
+    )
+
     var data = []
     for (var table of tables) {
       if (table.table_status === 'not_ready') {
@@ -66,19 +79,28 @@ router.get('/tables', async (req, res) => {
         if (order.served_time !== null) {
           order.served_time = formatDate(order.served_time)
         }
+        for (var cust of customer) {
+          if (cust.table_id === table.table_id) {
+            var fullName = { full_name: cust.full_name }
+          }
+          else {
+            var fullName = { full_name: null }
+          }
+        }
         delete order.table_number
-        data.push(Object.assign(order, table))
+        data.push(Object.assign(order, table, fullName))
       }
       else {
         data.push(table)
       }
     }
+
     await conn.commit()
     res.json({ tables: data })
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err);
+    res.status(500).send(err);
   }
   finally {
     conn.release()
@@ -91,25 +113,25 @@ router.get('/order/:orderId', async (req, res) => {
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
-    const [orderItem, field1] = await conn.query(
+    const [orderItems, field1] = await conn.query(
       `SELECT order_item.*, menu_name
-    FROM order_item
-    JOIN menu
-    USING (menu_id)
-    WHERE order_id = ?`,
+      FROM order_item
+      JOIN menu
+      USING (menu_id)
+      WHERE order_id = ?`,
       [req.params.orderId]
     )
 
     const [customer, field2] = await conn.query(
       `SELECT sc.check_in, CONCAT(fname, ' ', lname) AS \`full_name\`, sc.check_out
-    FROM \`order\` o
-    JOIN serviced_customer sc
-    USING (serviced_id)
-    LEFT OUTER JOIN customer_member cm
-    USING (account_id)
-    JOIN \`account\` a
-    USING (account_id)
-    WHERE order_id = ?`,
+      FROM \`order\` o
+      JOIN serviced_customer sc
+      USING (serviced_id)
+      LEFT OUTER JOIN customer_member cm
+      USING (account_id)
+      JOIN \`account\` a
+      USING (account_id)
+      WHERE order_id = ?`,
       [req.params.orderId]
     )
 
@@ -122,13 +144,13 @@ router.get('/order/:orderId', async (req, res) => {
       [req.params.orderId]
     )
 
-    var data = []
+    var data = {}
     if (customer.length === 1) {
       for (var cust of customer) {
         cust.check_in = formatDate(cust.check_in)
         cust.check_out = cust.check_out === null ? null : formatDate(cust.check_out)
       }
-      data.push(cust)
+      data = cust
     }
     else {
       for (var cust of customer2) {
@@ -136,14 +158,14 @@ router.get('/order/:orderId', async (req, res) => {
         cust.check_in = formatDate(cust.check_in)
         cust.check_out = cust.check_out === null ? null : formatDate(cust.check_out)
       }
-      data.push(cust)
+      data = cust
     }
     await conn.commit();
-    res.json({ orderItem: orderItem, customer: data })
+    res.json({ orderItems: orderItems, customer: data })
   }
   catch (err) {
     await conn.rollback();
-    return res.status(500).json(err);
+    res.status(500).send(err);
   }
   finally {
     conn.release()
@@ -163,13 +185,13 @@ router.put('/order/:orderId/serve', async (req, res) => {
       `,
       ['served', req.params.orderId]
     )
-    // res.send('Success')
+
     await conn.commit()
-    res.status(200).send();
+    res.status(200).send()
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err);
+    res.status(500).send(err);
   }
   finally {
     conn.release()
@@ -218,11 +240,11 @@ router.delete('/order/:orderId/cancel', async (req, res) => {
     )
 
     await conn.commit()
-    res.send('Success')
+    res.status(200).send()
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err)
+    res.status(500).send(err)
   }
   finally {
     conn.release()
@@ -261,11 +283,11 @@ router.post('/order/:orderId/completed', async (req, res) => {
     )
 
     await conn.commit()
-    res.send('Success')
+    res.status(200).send()
   }
   catch {
     await conn.rollback()
-    return res.status(500).json(err)
+    res.status(500).send(err)
   }
   finally {
     conn.release()
@@ -294,11 +316,11 @@ router.post('/menu', async (req, res) => {
     )
     menu[0].create_date = formatDate(menu[0].create_date)
     await conn.commit()
-    res.json({ menus: menu })
+    res.json({ menu: menu[0] })
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err)
+    res.status(500).send(err)
   }
   finally {
     conn.release()
@@ -334,7 +356,7 @@ router.put('/menu/:menuId', async (req, res) => {
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err)
+    res.status(500).send(err)
   }
   finally {
     conn.release()
@@ -353,11 +375,11 @@ router.delete('/menu/:menuId', async (req, res) => {
       [req.params.menuId]
     )
     await conn.commit()
-    res.send("Succuess")
+    res.status(200).send()
   }
   catch (err) {
     await conn.rollback()
-    return res.status(500).json(err)
+    res.status(500).send(err)
   }
   finally {
     conn.release()
@@ -368,7 +390,7 @@ router.delete('/menu/:menuId', async (req, res) => {
 // update password
 router.put('/account/:accountId/password', async (req, res) => {
   var body = req.body
-  res.send()
+  res.status(200).send()
 })
 
 exports.router = router

@@ -86,18 +86,45 @@
                 ref="menusOverview"
               >
                 <div
+                  v-if="sortedMenus.length === 0"
+                  class="w-100 h-100 d-flex justify-content-center align-items-center fs-2 fw-bold text-muted"
+                  style="opacity: .5"
+                >No Result</div>
+                <div
                   class="col-12 bg-light shadow-sm py-3 pe-4 mb-3"
                   style="border-radius: 1rem"
-                  v-for="(i, index) in 20"
-                  :key="'menu' + i"
+                  v-for="(menu, index) in sortedMenus"
+                  :key="'menu' + menu.menu_id"
                 >
                   <div class="d-flex justify-content-between">
                     <div class="col-3 d-flex justify-content-evenly align-items-center">
-                      <i class="fas fa-circle" style="color: #31d475"></i>
+                      <div class="form-check form-switch" v-if="editingMenuIndex === index">
+                        <input
+                          class="form-check-input border-secondary"
+                          :class="{'bg-success': editMenu.status}"
+                          :style="{filter: `brightness(${editMenu.status ? '150%' : '100%'})`}"
+                          type="checkbox"
+                          @click="editMenu.status = !editMenu.status"
+                          :checked="editMenu.status"
+                        />
+                      </div>
+                      <span v-show="editingMenuIndex !== index">
+                        <i
+                          class="fas fa-circle mx-2 me-3"
+                          style="color: #31d475; font-size: .8em"
+                          v-show="menu.menu_status === 'ready'"
+                        ></i>
+                        <i
+                          class="fas fa-circle mx-2 me-3"
+                          style="color: #bc2c3b; font-size: .8em"
+                          v-show="menu.menu_status === 'not_ready'"
+                        ></i>
+                      </span>
                       <div style="height: 128px; position: relative">
                         <div v-if="editingMenuIndex === index">
                           <img
                             class="rounded"
+                            :class="{'border border-danger': error.editImageFile}"
                             :src="imageDecode(editMenu.imageFile)"
                             style="height: 128px; width: 128px; object-fit: cover"
                           />
@@ -113,7 +140,7 @@
                         </div>
                         <img
                           class="rounded"
-                          src="https://bulma.io/images/placeholders/128x128.png"
+                          :src="menu.image_file_path || 'https://bulma.io/images/placeholders/128x128.png'"
                           style="height: 128px; width: 128px; object-fit: cover"
                           v-else
                         />
@@ -122,38 +149,42 @@
                     <div class="col-6 d-flex flex-wrap">
                       <div class="col-12 p-2">
                         <input
-                          class="form-control m-0 fs-5 p-2 fw-bold text-muted is-invalid"
+                          class="form-control m-0 fs-5 p-2 fw-bold"
+                          :class="{'is-invalid': error.editName}"
                           v-model="editMenu.name"
                           placeholder="Name"
-                          :style="{opacity: editMenu.name === '' ? '.5' : '1'}"
+                          :style="{color: `hsl(208, 7%, 46%, ${editMenu.name === '' ? '50%' : '100%'}) !important`}"
                           type="text"
-                          value="Menu Name"
                           v-if="editingMenuIndex === index"
                         />
-                        <div class="fs-5 p-2 fw-bold text-muted" v-else>Menu Name</div>
+                        <div class="fs-5 p-2 fw-bold text-muted" v-else>{{ menu.menu_name }}</div>
                       </div>
                       <div class="col-4 p-2">
                         <input
-                          class="form-control m-0 p-2"
+                          class="form-control m-0 p-2 fs-5"
+                          :class="{'is-invalid': error.editPrice}"
                           v-model="editMenu.price"
                           placeholder="Price"
                           type="number"
-                          value="Menu Name"
                           v-if="editingMenuIndex === index"
                         />
-                        <div class="p-2" v-else>220.00฿</div>
+                        <div class="p-2 fw-bold fs-5 text-theme-3" v-else>{{ menu.menu_price }}฿</div>
                       </div>
                       <div class="col-4 p-2" style="color: #fc8845">
                         <input
-                          class="form-control m-0 p-2"
+                          class="form-control m-0 p-2 fs-5"
+                          :class="{'is-invalid': error.editDiscount}"
                           v-model="editMenu.discount"
                           placeholder="Discount"
                           type="number"
-                          value="Menu Name"
                           v-if="editingMenuIndex === index"
                         />
-                        <div class="p-2" style="white-space: nowrap" v-else>
-                          210.00฿
+                        <div
+                          class="p-2 fw-bold fs-5"
+                          style="white-space: nowrap"
+                          v-if="editingMenuIndex !== index && menu.member_price"
+                        >
+                          {{ menu.member_price }}฿
                           <i class="fas fa-tag ms-2"></i>
                         </div>
                       </div>
@@ -162,14 +193,14 @@
                       <span
                         class="clickable"
                         v-show="editingMenuIndex !== index"
-                        @click="editing(null); editingMenuIndex = index"
+                        @click="editing(menu); editingMenuIndex = index"
                       >
                         <i class="fas fa-pen text-muted fs-5"></i>
                       </span>
                       <span
                         class="clickable"
                         v-show="editingMenuIndex === index"
-                        @click="editingMenuIndex = -1"
+                        @click="editingMenuIndex = -1; error.editName = false; error.editPrice = false; error.editDiscount = false; error.editImageFile = false"
                       >
                         <i class="fas fa-xmark text-muted fs-3"></i>
                       </span>
@@ -182,7 +213,7 @@
                           class="btn btn-danger fw-bold"
                           data-bs-toggle="modal"
                           data-bs-target="#confirmDeleteModal"
-                          @click="deleteMenu.name = 'Test'"
+                          @click="deleteMenu.name = menu.menu_name; deleteMenu.id = menu.menu_id"
                         >Delete</button>
                       </div>
                       <!-- <i class="fas fa-pen text-warning fs-5"></i> -->
@@ -207,17 +238,31 @@
                     <div class="mb-3 fw-bold text-muted">Menu Info</div>
                     <div class="col-12 mb-3">
                       <!-- <label class="form-label text-muted fw-bold">Menu Name</label> -->
-                      <input type="text" class="form-control py-3 px-4" placeholder="Name" />
+                      <input
+                        type="text"
+                        class="form-control py-3 px-4"
+                        :class="{'is-invalid': error.newName}"
+                        v-model="newMenu.name"
+                        placeholder="Name"
+                      />
                     </div>
                     <div class="col-6 mb-3 pe-3">
                       <!-- <label class="form-label text-muted fw-bold">Menu Price</label> -->
-                      <input type="number" class="form-control py-3 px-4" placeholder="Price" />
+                      <input
+                        type="number"
+                        class="form-control py-3 px-4"
+                        :class="{'is-invalid': error.newPrice}"
+                        v-model="newMenu.price"
+                        placeholder="Price"
+                      />
                     </div>
                     <div class="col-6 mb-4">
                       <!-- <label class="form-label text-muted fw-bold">Discount (for member)</label> -->
                       <input
                         type="number"
                         class="form-control py-3 px-4"
+                        :class="{'is-invalid': error.newDiscount}"
+                        v-model="newMenu.discount"
                         placeholder="Discount (optional)"
                       />
                       <!-- <div class="form-text">Optional</div> -->
@@ -227,11 +272,15 @@
                       <input
                         type="file"
                         class="form-control"
+                        :class="{'is-invalid': error.newImageFile}"
                         accept="image/*"
                         @change="chooseNewImage"
                       />
                     </div>
-                    <div class="col-12 mt-3" v-if="newMenu.imageFile">
+                    <div
+                      class="col-12 mt-3"
+                      v-if="newMenu.imageFile && this.newMenu.imageFile.type.includes('image')"
+                    >
                       <img
                         :src="imageDecode(newMenu.imageFile)"
                         class="card-img-top rounded border"
@@ -243,6 +292,7 @@
                       <button
                         type="button"
                         class="btn text-light btn-warning border-2 fw-bold"
+                        @click="addNew()"
                       >Submit</button>
                     </div>
                   </div>
@@ -269,7 +319,12 @@
               class="btn btn-outline-secondary border-2 fw-bold"
               data-bs-dismiss="modal"
             >Cancel</button>
-            <button type="button" class="btn btn-danger fw-bold" data-bs-dismiss="modal">Confirm</button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              data-bs-dismiss="modal"
+              @click="confirmDelete()"
+            >Confirm</button>
           </div>
         </div>
       </div>
@@ -334,7 +389,6 @@ export default {
     },
     chooseNewImage(event) {
       this.newMenu.imageFile = event.target.files[0];
-      this.newMenu.imageName = event.target.files[0].name;
     },
     chooseEditImage() {
       var input = document.createElement("input");
@@ -343,36 +397,157 @@ export default {
 
       input.onchange = (e) => {
         this.editMenu.imageFile = e.target.files[0];
-        console.log(this.editMenu.imageFile);
       };
 
       input.click();
     },
     addNew() {
-      //
+      this.newMenu.name = this.newMenu.name.trim();
+      this.newMenu.price = parseFloat(this.newMenu.price);
+      this.newMenu.discount = parseFloat(this.newMenu.discount);
+
+      this.error.newName = this.newMenu.name === "";
+      this.error.newPrice =
+        isNaN(this.newMenu.price) || this.newMenu.price <= 0;
+      this.error.newDiscount =
+        this.newMenu.discount <= 0 ||
+        this.newMenu.discount >= this.newMenu.price;
+      this.error.newImageFile =
+        !this.newMenu.imageFile ||
+        !this.newMenu.imageFile.type.includes("image");
+
+      if (
+        !this.error.newName &&
+        !this.error.newPrice &&
+        !this.error.newDiscount &&
+        !this.error.newImageFile
+      ) {
+        var formData = new FormData();
+        formData.append("image", this.newMenu.imageFile);
+        formData.append("menu_name", this.newMenu.name);
+        formData.append("menu_price", this.newMenu.price);
+        formData.append(
+          "member_price",
+          isNaN(this.newMenu.discount) ? null : this.newMenu.discount
+        );
+
+        axios
+          .post(`http://localhost:3000/menu`, formData)
+          .then((res) => {
+            this.menus.push(res.data.menus[0]);
+            this.newMenu.name = "";
+            this.newMenu.price = "";
+            this.newMenu.discount = "";
+            this.newMenu.imageFile = "";
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     },
     editing(menu) {
-      console.log("Menu param: " + menu);
-      this.editMenu.name = "Menu Name";
-      this.editMenu.price = "220";
-      this.editMenu.discount = "210";
-      this.editMenu.imageFile =
-        "https://bulma.io/images/placeholders/128x128.png";
+      this.editMenu.id = menu.menu_id;
+      this.editMenu.name = menu.menu_name;
+      this.editMenu.price = menu.menu_price;
+      this.editMenu.discount = menu.member_price || "";
+      this.editMenu.status = menu.menu_status === "ready";
+      this.editMenu.imageFile = this.imageDecode(
+        menu.image_file_path ||
+          "https://bulma.io/images/placeholders/128x128.png"
+      );
     },
     saveEdit() {
-      //
+      this.editMenu.name = this.editMenu.name.trim();
+      this.editMenu.price = parseFloat(this.editMenu.price);
+      this.editMenu.discount = parseFloat(this.editMenu.discount);
+
+      this.error.editName = this.editMenu.name === "";
+      this.error.editPrice =
+        isNaN(this.editMenu.price) || this.editMenu.price <= 0;
+      this.error.editDiscount =
+        this.editMenu.discount <= 0 ||
+        this.editMenu.discount >= this.editMenu.price;
+      this.error.editImageFile =
+        typeof this.editMenu.imageFile === "object" &&
+        !this.editMenu.imageFile.type.includes("image");
+
+      if (
+        !this.error.editName &&
+        !this.error.editPrice &&
+        !this.error.editDiscount &&
+        !this.error.editImageFile
+      ) {
+        var formData = new FormData();
+        formData.append("image", this.editMenu.imageFile);
+        formData.append("menu_name", this.editMenu.name);
+        formData.append("menu_price", this.editMenu.price);
+        formData.append(
+          "menu_status",
+          this.editMenu.status ? "ready" : "not_ready"
+        );
+        formData.append(
+          "member_price",
+          isNaN(this.editMenu.discount) ? null : this.editMenu.discount
+        );
+
+        axios
+          .put(`http://localhost:3000/menu/${this.editMenu.id}`, formData)
+          .then((res) => {
+            var targetMenu = this.menus.find(
+              (val) => val.menu_id === this.editMenu.id
+            );
+            var data = res.data.menus;
+            targetMenu.menu_name = data.menu_name;
+            targetMenu.menu_price = data.menu_price;
+            targetMenu.member_price = data.member_price;
+            targetMenu.menu_status = data.menu_status;
+            this.editingMenuIndex = -1;
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     },
     confirmDelete() {
-      console.log(this.deleteMenu.id);
-      console.log(this.deleteMenu.name);
-      //
+      axios
+        .delete(`http://localhost:3000/menu/${this.deleteMenu.id}`)
+        .then((res) => {
+          if (res.status === 200) {
+            var targetIndex = this.menus.findIndex(
+              (val) => val.menu_id === this.deleteMenu.id
+            );
+            this.menus.splice(targetIndex, 1);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+  },
+  computed: {
+    sortedMenus() {
+      var menus = this.menus.concat([]);
+      if (this.sortBy === "recent") {
+        menus.sort((a, b) => (a.menu_id > b.menu_id ? -1 : 1));
+      } else if (this.sortBy === "alphabetAsc") {
+        menus.sort((a, b) => (a.menu_name < b.menu_name ? -1 : 1));
+      } else if (this.sortBy === "alphabetDesc") {
+        menus.sort((a, b) => (a.menu_name > b.menu_name ? -1 : 1));
+      } else if (this.sortBy === "priceAsc") {
+        menus.sort((a, b) => (a.menu_price < b.menu_price ? -1 : 1));
+      } else if (this.sortBy === "priceDesc") {
+        menus.sort((a, b) => (a.menu_price > b.menu_price ? -1 : 1));
+      }
+      return menus.filter((val) =>
+        val.menu_name.toLowerCase().includes(this.searchQuery.trim().toLowerCase())
+      );
     },
   },
   created() {
     axios
       .get("http://localhost:3000/menus")
       .then((res) => {
-        console.log(res.data);
+        this.menus = res.data.menus;
       })
       .catch((err) => {
         console.log(err);

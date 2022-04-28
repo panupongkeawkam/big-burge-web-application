@@ -13,7 +13,7 @@ CREATE TABLE `account`(
     `lname` VARCHAR(255) NOT NULL,
     `phone_number` CHAR(10) NOT NULL,
     PRIMARY KEY (`account_id`)
-) AUTO_INCREMENT = 11;
+);
 INSERT INTO `account` 
 VALUES 
   (
@@ -42,7 +42,7 @@ CREATE TABLE `serviced_customer`(
     PRIMARY KEY (`serviced_id`),
     FOREIGN KEY `customer_member_id` (`account_id`)
     REFERENCES `customer_member`(`account_id`)
-) AUTO_INCREMENT = 16;
+);
 INSERT INTO `serviced_customer` 
 VALUES 
   (1, null, "2022-02-02 15:24:36", "2022-01-02 18:47:21"), 
@@ -62,7 +62,7 @@ CREATE TABLE `employee` (
     PRIMARY KEY (`account_id`),
     FOREIGN KEY `account_account_id` (`account_id`)
     REFERENCES `account`(`account_id`)
-) AUTO_INCREMENT = 11;
+);
 INSERT INTO `employee` 
 VALUES 
   (
@@ -107,7 +107,7 @@ CREATE TABLE `order` (
     REFERENCES `serviced_customer`(`serviced_id`),
     FOREIGN KEY `table_table_id` (`table_id`)
     REFERENCES `table`(`table_id`)
-) AUTO_INCREMENT = 11;
+);
 INSERT INTO `order` 
 VALUES 
    (
@@ -132,7 +132,7 @@ CREATE TABLE `table` (
 	`table_id` INT(10) AUTO_INCREMENT,
     `status` ENUM('ready', 'not_ready') NOT NULL,
     PRIMARY KEY (`table_id`)
-) AUTO_INCREMENT = 16;
+);
 INSERT INTO `table` 
 VALUES 
   (1, 'ready'), 
@@ -142,7 +142,14 @@ VALUES
   (5, 'ready'), 
   (6, 'ready'), 
   (7, 'ready'), 
-  (8, 'ready');
+  (8, 'ready'); 
+  (9, 'ready'), 
+  (10, 'ready'), 
+  (11, 'ready'), 
+  (12, 'ready');
+  (13, 'ready');
+  (14, 'ready');
+  (15, 'ready');
 
 DROP TABLE IF EXISTS `order_item`;
 CREATE TABLE `order_item` (
@@ -157,7 +164,7 @@ CREATE TABLE `order_item` (
     REFERENCES `order`(`order_id`),
     FOREIGN KEY `menu_menu_id` (`menu_id`)
     REFERENCES `menu`(`menu_id`)
-) AUTO_INCREMENT = 23;
+);
 INSERT INTO `order_item` 
 VALUES 
   (1, 100.00, 4, 400.00, 1, 1),
@@ -177,7 +184,7 @@ CREATE TABLE `receipt` (
     PRIMARY KEY (`receipt_id`),
     FOREIGN KEY `receipt_order_order_id` (`order_id`)
     REFERENCES `order`(`order_id`)
-) AUTO_INCREMENT = 11;
+);
 INSERT INTO `receipt` 
 VALUES 
   (
@@ -195,12 +202,12 @@ CREATE TABLE `menu` (
     `menu_name` VARCHAR(255),
     `menu_price` FLOAT(8, 2),
     `menu_status` ENUM('ready', 'not_ready', 'deleted'),
-    `create_date` DATETIME,
+    `create_date` DATE,
     `image_file_path` VARCHAR(255),
     `member_price` FLOAT(8, 2),
     `delete_date` DATE,
     PRIMARY KEY (`menu_id`)
-) AUTO_INCREMENT = 11;
+);
 INSERT INTO `menu` 
 VALUES 
   (

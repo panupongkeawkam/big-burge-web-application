@@ -90,9 +90,12 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
+      tableId: "",
       username: "",
       password: "",
       showMemberLogin: false,
@@ -119,10 +122,21 @@ export default {
         }, 300);
       }
     },
-    async guest() {},
+    async guest() {
+      axios
+        .post(`http://localhost:3000/table/${this.tableId}/guest`)
+        .then(() => {
+          this.$router.push(`/table/${this.tableId}/menu`);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     async login() {},
   },
-  created() {},
+  created() {
+    this.tableId = this.$route.params.tableId;
+  },
   mounted() {
     document.body.style.overflow = "hidden";
     this.$refs.container.style.minHeight = window.innerHeight + "px";
@@ -133,7 +147,10 @@ export default {
       this.$refs.container.style.minHeight = window.innerHeight + "px";
     };
 
-    console.log(this.$route.params.tableId);
+    if (this.$route.query.login === "required") {
+      this.error = true;
+      this.toggleMemberLogin();
+    }
   },
 };
 </script>

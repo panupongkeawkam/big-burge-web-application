@@ -21,16 +21,15 @@
           </span>
           <input
             class="form-control ps-4 py-3"
-            :class="{ 'border-danger text-danger': error }"
+            :class="{ 'is-invalid text-danger': error }"
             type="text"
             placeholder="Username"
             v-model="username"
-            onfocus="this.style.border = '1px solid #ccd4dc'"
             @focus="error = false"
-            required
+            ref="usernameInput"
           />
         </div>
-        <div class="input-group mb-5" style="width: 60%">
+        <div class="input-group mb-4" style="width: 60%">
           <span
             class="input-group-text px-4 py-3 bg-light text-theme-1"
             :class="{ 'border-danger text-danger': error }"
@@ -39,14 +38,26 @@
           </span>
           <input
             class="form-control ps-4 py-3"
-            :class="{ 'border-danger text-danger': error }"
-            type="password"
+            :class="{ 'is-invalid text-danger': error }"
+            :type="showPassword ? 'text' : 'password'"
             placeholder="Password"
             v-model="password"
-            onfocus="this.style.border = '1px solid #ccd4dc'"
             @focus="error = false"
-            required
+            ref="passwordInput"
           />
+        </div>
+        <div
+          class="mb-5 text-muted clickable ps-2"
+          style="font-size: .9em; width: 60%"
+          @click="showPassword = !showPassword"
+        >
+          <span v-show="showPassword">
+            <i class="fas fa-eye-slash me-1"></i>
+          </span>
+          <span v-show="!showPassword">
+            <i class="fas fa-eye me-1"></i>
+          </span>
+          {{ showPassword ? 'Hide' : 'Show' }} password
         </div>
         <div class="input-group mb-5 d-flex justify-content-center">
           <input
@@ -84,6 +95,7 @@ export default {
       error: false,
       username: "",
       password: "",
+      showPassword: false,
     };
   },
   methods: {
@@ -93,11 +105,14 @@ export default {
           username: this.username,
           password: this.password,
         })
-        .then()
+        .then((res) => {
+          console.log(res);
+          this.$router.push("/manager/tables");
+        })
         .catch((err) => {
           console.log(err);
+          this.error = true;
         });
-      this.$router.push("/manager/tables");
     },
   },
   mounted() {

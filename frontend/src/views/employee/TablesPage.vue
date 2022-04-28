@@ -39,7 +39,7 @@
                 <div class="d-flex">
                   <div
                     class="d-flex ps-2 pe-3 clickable"
-                    @click="filter = filter === 'created' ? '' : 'created'"
+                    @click="filter = filter === 'created' ? '' : 'created'; hideInfo()"
                   >
                     <div
                       class="rounded me-2"
@@ -60,7 +60,7 @@
                   </div>
                   <div
                     class="d-flex ps-2 pe-3 clickable"
-                    @click="filter = filter === 'waiting' ? '' : 'waiting'"
+                    @click="filter = filter === 'pending' ? '' : 'pending'; hideInfo()"
                   >
                     <div
                       class="rounded me-2"
@@ -74,14 +74,14 @@
                       <div
                         class="w-100 h-100"
                         style="background: #fad945"
-                        v-show="filter === 'waiting'"
+                        v-show="filter === 'pending'"
                       ></div>
                     </div>
                     <div class="fw-bold text-muted">Waiting</div>
                   </div>
                   <div
                     class="d-flex ps-2 pe-3 clickable"
-                    @click="filter = filter === 'served' ? '' : 'served'"
+                    @click="filter = filter === 'served' ? '' : 'served'; hideInfo()"
                   >
                     <div
                       class="rounded me-2"
@@ -102,7 +102,7 @@
                   </div>
                   <div
                     class="d-flex ps-2 pe-3 clickable"
-                    @click="filter = filter === 'billing' ? '' : 'billing'"
+                    @click="filter = filter === 'billing' ? '' : 'billing'; hideInfo()"
                   >
                     <div
                       class="rounded me-2"
@@ -124,10 +124,15 @@
                 </div>
               </div>
               <div
-                class="col-12 d-flex flex-wrap"
+                class="col-12 d-flex flex-wrap align-content-start"
                 style="overflow: auto; height: 90%"
                 ref="tablesOverview"
               >
+                <div
+                  v-if="filteredTables.length === 0"
+                  class="w-100 h-100 d-flex justify-content-center align-items-center fs-2 fw-bold text-muted"
+                  style="opacity: .5"
+                >No Table to Show</div>
                 <div
                   class="shadow-sm mb-3 me-3 p-4 d-flex flex-column justify-content-between position-relative"
                   style="width: 300px;
@@ -135,38 +140,59 @@
                   border-radius: 1rem;
                   background: white;
                 "
-                  :style="{ filter: `opacity(${i == 5 ? '.3' : '1'}) brightness(${i == 5 ? '80%' : '100%'})` }"
-                  v-for="i in 15"
+                  :style="{ filter: `opacity(${table.table_status === 'ready' ? '.3' : '1'}) brightness(${table.table_status === 'ready' ? '80%' : '100%'})` }"
+                  v-for="(table, index) in filteredTables"
                   @click="
-                  showInfo();
-                  displayOrder = i;
+                  showInfo(table);
+                  displayOrderIndex = index;
                 "
                   :class="{
-                  clickable: i !== 5,
-                  'selected-table': displayOrder === i,
+                  clickable: table.table_status === 'not_ready',
+                  'selected-table': displayOrderIndex === index && table.table_status === 'not_ready',
                 }"
-                  :key="i"
+                  :key="'table' + table.table_id"
                 >
                   <div class="d-flex justify-content-between">
                     <span class="fw-bold fs-4 text-muted">
                       {{
-                      (i + 100).toString().slice(1)
+                      (table.table_id + 100).toString().slice(1)
                       }}
                     </span>
                     <div
+                      v-if="table.queue"
                       class="bg-danger px-4 mb-2 d-flex justify-content-center align-items-center fw-bold text-white rounded-pill"
-                    >Q1</div>
+                    >Q{{ table.queue }}</div>
                     <span>
-                      <i class="fas fa-clipboard-list" style="font-size: 2em; color: #39c8ef"></i>
-                      <!-- <i class="fas fa-clock" style="font-size: 2em; color: #fad945"></i> -->
-                      <!-- <i class="fas fa-utensils" style="font-size: 2em; color: #31d475"></i> -->
-                      <!-- <i class="fas fa-file-invoice-dollar" style="font-size: 2em; color: #fc8845"></i> -->
+                      <i
+                        v-if="table.status === 'created'"
+                        class="fas fa-clipboard-list"
+                        style="font-size: 2em; color: #39c8ef"
+                      ></i>
+                      <i
+                        v-else-if="table.status === 'pending'"
+                        class="fas fa-clock"
+                        style="font-size: 2em; color: #fad945"
+                      ></i>
+                      <i
+                        v-else-if="table.status === 'served'"
+                        class="fas fa-utensils"
+                        style="font-size: 2em; color: #31d475"
+                      ></i>
+                      <i
+                        v-else-if="table.status === 'billing'"
+                        class="fas fa-file-invoice-dollar"
+                        style="font-size: 2em; color: #fc8845"
+                      ></i>
                     </span>
                   </div>
                   <div class="d-flex flex-column">
                     <span class="text-muted fw-bold mb-1" style="opacity: 0.5">Steve Rogers</span>
-                    <span class="text-muted fw-bold">4 Item</span>
-                    <span class="text-muted fw-bold fs-5">500.00฿</span>
+                    <span
+                      class="text-muted fw-bold"
+                    >{{ table.table_status === 'ready' ? '' : table.quantity_item + ' Item' }}</span>
+                    <span
+                      class="text-muted fw-bold fs-5"
+                    >{{ table.table_status === 'ready' ? '--.--' : (table.total_price).toFixed(2) + '฿' }}</span>
                   </div>
                 </div>
               </div>
@@ -184,12 +210,12 @@
                 class="pe-4"
                 @click="
                 hideInfo();
-                displayOrder = -1;
+                displayOrderIndex = -1;
               "
               >
                 <i class="fas fa-xmark text-muted clickable" style="font-size: 1.6em"></i>
               </span>
-              <h2 class="fw-bold text-theme-2">Table 1</h2>
+              <h2 class="fw-bold text-theme-2">Table {{ displayTable.table_id }}</h2>
               <span>
                 <i class="fas fa-xmark text-muted clickable" style="font-size: 1.6em; opacity: 0"></i>
               </span>
@@ -200,42 +226,59 @@
               ref="tableInfoBody"
             >
               <div ref="tableInfoStatus">
-                <!-- <div class="d-flex align-items-center pb-4">
-                <span>
-                  <i class="fas fa-clipboard-list me-2" style="font-size: 1.5em; color: #39c8ef"></i>
-                  <span class="fw-bold text-muted">Created</span>
-                </span>
-                </div>-->
-                <!-- <div class="d-flex align-items-center pb-4">
-                <span>
-                  <i class="fas fa-clock me-2" style="font-size: 1.5em; color: #fad945"></i>
-                  <span class="fw-bold text-muted">Waiting</span>
-                </span>
-                </div>-->
-                <!-- <div class="d-flex align-items-center pb-4">
-                <span>
-                  <i
-                    class="fas fa-file-invoice-dollar me-2"
-                    style="font-size: 1.5em; color: #fc8845"
-                  ></i>
-                  <span class="fw-bold text-muted">Billing</span>
-                </span>
-                </div>-->
-                <div class="d-flex align-items-center pb-4">
+                <div
+                  class="d-flex align-items-center pb-4 m-0"
+                  v-if="displayTable.status === 'created'"
+                >
+                  <span>
+                    <i class="fas fa-clipboard-list me-2" style="font-size: 1.5em; color: #39c8ef"></i>
+                    <span class="fw-bold text-muted">Created</span>
+                  </span>
+                </div>
+                <div
+                  class="d-flex align-items-center pb-4"
+                  v-else-if="displayTable.status === 'pending'"
+                >
+                  <span>
+                    <i class="fas fa-clock me-2" style="font-size: 1.5em; color: #fad945"></i>
+                    <span class="fw-bold text-muted">Waiting</span>
+                  </span>
+                </div>
+                <div
+                  class="d-flex align-items-center pb-4"
+                  v-else-if="displayTable.status === 'served'"
+                >
                   <span>
                     <i class="fas fa-utensils me-2" style="font-size: 1.5em; color: #31d475"></i>
                     <span class="fw-bold text-muted">Served</span>
                   </span>
                 </div>
+                <div
+                  class="d-flex align-items-center pb-4"
+                  v-else-if="displayTable.status === 'billing'"
+                >
+                  <span>
+                    <i
+                      class="fas fa-file-invoice-dollar me-2"
+                      style="font-size: 1.5em; color: #fc8845"
+                    ></i>
+                    <span class="fw-bold text-muted">Billing</span>
+                  </span>
+                </div>
               </div>
-              <div class="pe-3" style="height: 400px; overflow: auto" ref="tableInfoItem">
+              <div class="pe-3 m-0" style="overflow: auto" ref="tableInfoItem">
+                <div
+                  class="text-muted fw-bold fs-4 h-100 d-flex justify-content-center align-items-center"
+                  style="opacity: .5"
+                  v-if="displayOrderItems.length === 0"
+                >No Order</div>
                 <div
                   class="rounded p-3 bg-light mb-2 shadow-sm d-flex"
-                  v-for="i in 20"
-                  :key="'item' + i"
+                  v-for="item in displayOrderItems"
+                  :key="'item' + item.item_no"
                 >
-                  <div class="col-11 text-muted">Menu Name</div>
-                  <div class="col-1 fw-bold text-muted">x2</div>
+                  <div class="col-11 fw-bold text-theme-2">{{ item.menu_name }}</div>
+                  <div class="col-1 fw-bold text-muted">x{{ item.amount }}</div>
                 </div>
               </div>
               <section ref="tableInfoSummary">
@@ -245,42 +288,48 @@
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
                     <span class="fw-bold text-muted" style="font-size: 0.8em">Customer Name</span>
-                    <span class="fs-5 text-theme-2">-</span>
+                    <span class="fs-5 fw-bold text-theme-2">{{ displayCustomer.full_name }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 bg-theme-4 mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
                     <span class="fw-bold text-muted" style="font-size: 0.8em">Check In Time</span>
-                    <span class="fs-5 text-theme-2">Today 12:50:12</span>
+                    <span class="fs-5 fw-bold text-theme-2">{{ displayCustomer.check_in }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 bg-theme-4 me-2 mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
                     <span class="fw-bold text-muted" style="font-size: 0.8em">Item Amount</span>
-                    <span class="fs-3 text-theme-2">4</span>
+                    <span class="fs-3 fw-bold text-theme-2">{{ displayTable.quantity_item }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 bg-theme-4 mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
                     <span class="fw-bold text-muted" style="font-size: 0.8em">Total</span>
-                    <span class="fs-3 text-theme-2">1400.00฿</span>
+                    <span class="fs-3 fw-bold text-theme-2">{{ displayTable.total_price }}฿</span>
                   </div>
                 </div>
                 <div class="d-flex justify-content-end pe-4">
                   <button
                     class="btn btn-lg text-light btn-info me-2 fw-bold border-2"
-                    v-if="true"
+                    style="opacity: 0"
+                  >Emtpy Button</button>
+                  <button
+                    class="btn btn-lg text-light btn-info me-2 fw-bold border-2"
+                    v-if="displayTable.status === 'billing'"
+                    @click="completeOrder()"
                   >Finish</button>
                   <button
                     class="btn btn-lg text-light btn-warning me-2 fw-bold border-2"
-                    v-if="true"
+                    v-if="displayTable.status === 'pending'"
+                    @click="serveOrder()"
                   >Serve</button>
                   <button
                     class="btn btn-lg btn-danger text-light border-2 fw-bold"
-                    v-if="true"
+                    v-if="['created', 'pending'].includes(displayTable.status)"
                     data-bs-toggle="modal"
                     data-bs-target="#cancelOrderModal"
                   >Cancel Order</button>
@@ -298,7 +347,7 @@
             <h5 class="modal-title fw-bold text-muted">Cancel Order</h5>
           </div>
           <div class="modal-body">
-            Are you sure to cancel order for 'Table 1'?
+            Are you sure to cancel order for 'Table {{ displayTable.table_id }}'?
             <br />
             <span class="text-danger" style="font-size: .9em">Warning: This change can't turned back</span>
           </div>
@@ -311,7 +360,7 @@
             <button
               class="btn btn-danger fw-bold text-light border-2"
               data-bs-dismiss="modal"
-              @click="logout()"
+              @click="cancelOrder()"
             >Confirm</button>
           </div>
         </div>
@@ -333,19 +382,42 @@ export default {
       showTableInfo: false,
       tables: [],
       menus: [],
-      displayOrder: -1,
+      displayOrderIndex: -1,
+      displayTable: {},
+      displayOrderItems: [],
+      displayCustomer: {},
       filter: "",
-      queue: 1,
+      queue: 0,
     };
   },
   methods: {
-    showInfo() {
-      var el = this.$refs["tableInfo"];
-      el.style.animation = "show .3s";
-      el.style.width = "33.33%";
-      el.style.display = "initial";
+    showInfo(table) {
+      if (table.table_status === "ready") {
+        return;
+      }
+
+      axios
+        .get(`http://localhost:3000/order/${table.order_id}`)
+        .then((res) => {
+          this.displayTable = table;
+          this.displayOrderItems = res.data.orderItems;
+          this.displayCustomer = res.data.customer;
+
+          var el = this.$refs["tableInfo"];
+          el.style.animation = "show .3s";
+          el.style.width = "33.33%";
+          el.style.display = "initial";
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     },
     hideInfo() {
+      this.displayTable = {};
+      this.displayOrderItems = [];
+      this.displayCustomer = {};
+      this.displayOrderIndex = -1
+
       var el = this.$refs["tableInfo"];
       el.style.animation = "hide .3s";
       setTimeout(() => {
@@ -353,37 +425,113 @@ export default {
         el.style.width = "0%";
       }, 300);
     },
+    queuedTables() {
+      var tables = [].concat(this.tables);
+      tables.sort((a, b) => {
+        if (
+          a.status === "pending" &&
+          b.status === "pending" &&
+          new Date(a.ordering_time) > new Date(b.ordering_time)
+        ) {
+          return -1;
+        } else if (a.status === "pending" && b.status !== "pending") {
+          return -1;
+        }
+        return 1;
+      });
+      var queue = 1;
+      for (var table of tables) {
+        if (table.status === "pending") {
+          table.queue = queue;
+          queue++;
+        } else if (table.status !== "pending") {
+          break;
+        }
+      }
+      return tables;
+    },
+    serveOrder() {
+      axios
+        .put(`http://localhost:3000/order/${this.displayTable.order_id}/serve`)
+        .then(res => {
+          console.log(res)
+          window.location.reload()
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    cancelOrder() {
+      axios
+        .delete(`http://localhost:3000/order/${this.displayTable.order_id}/cancel`)
+        .then(res => {
+          console.log(res)
+          window.location.reload()
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    completeOrder() {
+      axios
+        .post(`http://localhost:3000/order/${this.displayTable.order_id}/completed`)
+        .then(res => {
+          console.log(res)
+          window.location.reload()
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
   },
   created() {
     axios
       .get("http://localhost:3000/tables")
       .then((res) => {
-        console.log(res)
-        this.tables = res.data;
+        this.tables = res.data.tables;
       })
       .catch((err) => {
         console.log(err);
       });
+
+    axios
+      .get("http://localhost:3000/menus")
+      .then((res) => {
+        this.menus = res.data.menus;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  },
+  computed: {
+    filteredTables() {
+      if (this.filter === "created") {
+        return this.queuedTables().filter((val) => val.status === "created");
+      } else if (this.filter === "pending") {
+        return this.queuedTables().filter((val) => val.status === "pending");
+      } else if (this.filter === "served") {
+        return this.queuedTables().filter((val) => val.status === "served");
+      } else if (this.filter === "billing") {
+        return this.queuedTables().filter((val) => val.status === "billing");
+      }
+      return this.queuedTables();
+    },
   },
   mounted() {
     var currentHeight = window.innerHeight;
     this.$refs["container"].style.height = currentHeight + "px";
     this.$refs["mainCanvas"].style.height = `calc(${currentHeight}px - 3rem)`;
 
-    this.$refs["tableInfo"].style.display = "none";
-    this.$refs["tableInfo"].style.overflow = "hidden";
-
-    this.showInfo();
-
     var tableInfoBodyHeight = this.$refs["tableInfoBody"].clientHeight;
     var tableInfoStatusHeight = this.$refs["tableInfoStatus"].clientHeight;
     var tableInfoSummaryHeight = this.$refs["tableInfoSummary"].clientHeight;
 
+    this.$refs["tableInfo"].style.overflow = "hidden";
     this.$refs["tableInfo"].style.display = "none";
 
     this.$refs["tableInfoItem"].style.height = `calc(${
       tableInfoBodyHeight - tableInfoStatusHeight - tableInfoSummaryHeight
-    }px + 1.5rem)`;
+    }px - 8rem)`;
 
     window.onresize = () => {
       currentHeight = window.innerHeight;

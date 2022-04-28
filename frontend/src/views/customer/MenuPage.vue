@@ -13,10 +13,7 @@
         />
         <div class="d-flex justify-content-center align-items-center ms-3">
           <div>
-            <span
-              class="clickable text-light"
-              data-bs-toggle="dropdown"
-            >
+            <span class="clickable text-light" data-bs-toggle="dropdown">
               <i class="fas fa-sort position-relative me-3" style="font-size: 1.5em"></i>
             </span>
             <ul class="dropdown-menu p-3 shadow-sm border-0">
@@ -41,19 +38,23 @@
               </li>
             </ul>
           </div>
-          <span style="position: relative">
+          <router-link :to="`/table/${this.tableId}/order`" style="position: relative">
             <i class="fas fa-clipboard-check text-light clickable" style="font-size: 1.5em; "></i>
-            <span class="number-notification">10</span>
-          </span>
+            <span class="number-notification" v-if="order.quantity_item">{{ order.quantity_item }}</span>
+          </router-link>
         </div>
       </div>
     </div>
 
     <!-- menu list -->
-    <div class="row py-2 px-0 rounded bg-light shadow-sm mx-1 my-2" v-for="i in 20" :key="i">
+    <div
+      class="row py-2 px-0 rounded bg-light shadow-sm mx-1 my-2"
+      v-for="menu in sortedMenus"
+      :key="'menu' + menu.menu_id"
+    >
       <div class="col-4 d-flex justify-content-start">
         <img
-          src="https://bulma.io/images/placeholders/128x128.png"
+          :src=" menu.image_file_path || 'https://bulma.io/images/placeholders/128x128.png'"
           class="rounded"
           style="width: 96px; height: 96px; object-fit: cover"
           alt
@@ -61,26 +62,30 @@
       </div>
       <div class="col-8 d-flex flex-wrap">
         <div class="col-12">
-          <span class="text-theme-2 fw-bold line-limit-2">Menu Name</span>
+          <span class="text-theme-2 fw-bold line-limit-2">{{ menu.menu_name }}</span>
         </div>
-        <!-- <div class="col-12 fw-bold text-muted" style="font-size: .8em"> -->
-        <!-- <span style="text-decoration: line-through; opacity: .5;" v-if="menu.menu_price !== menu.member_price">{{ menu.menu_price.toFixed(2) }}฿</span> -->
-        <!-- <span>{{ menu.member_price.toFixed(2) }}฿</span> -->
-        <!-- </div> -->
         <div
           class="col-6 d-flex flex-column fw-bold text-muted text-nowrap"
           style="font-size: .8em"
         >
-          <span :style="{textDecoration: true ? 'line-through' : 'initial'}">220.00฿</span>
-          <span class style="color: #fc8845" v-if="true">
+          <span
+            :style="{textDecoration: customer.account_id !== null && menu.member_price ? 'line-through' : 'initial'}"
+          >{{ menu.menu_price.toFixed(2) }}฿</span>
+          <span
+            class
+            style="color: #fc8845"
+            v-if="customer.account_id !== null && menu.member_price"
+          >
             <i class="fas fa-tag me-1"></i>
-            220.00฿
+            {{ menu.member_price.toFixed(2) }}฿
           </span>
         </div>
         <div class="col-6 d-flex justify-content-end align-items-end p-2 pe-0">
-          <button class="btn btn-warning px-3 py-1 fw-bold text-light" style="font-size: .8em">Add</button>
-          <!-- <i :id="'menu' + menu.menu_id" class="fas fa-plus-circle clickable" style="font-size: 1.5em; color: #ffa723"
-          @click="add(menu)" key="'menu' + menu.menu_id" disabled></i>-->
+          <button
+            class="btn btn-warning px-3 py-1 fw-bold text-light"
+            style="font-size: .8em"
+            @click="add(menu)"
+          >Add</button>
         </div>
       </div>
     </div>
@@ -88,19 +93,120 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       searchQuery: "",
       sortBy: "",
+      tableId: "",
+      menus: [],
+      order: {},
+      orderItems: [],
+      customer: {},
     };
   },
   methods: {
-    async add() {},
-    async fetchIncrease() {},
-    async fetchAdd() {},
+    async add(menu) {
+      var targetItem = this.orderItems.find(
+        (val) => val.menu_id === menu.menu_id
+      );
+
+      if (targetItem !== undefined) {
+        this.increaseItem(targetItem);
+        return;
+      }
+
+      var price =
+        this.customer.account_id === null ? menu.menu_price : menu.member_price;
+
+      this.addNewItem({
+        menu_id: menu.menu_id,
+        menu_price: price,
+      });
+    },
+    increaseItem(item) {
+      axios
+        .put(
+          `http://localhost:3000/order/${this.order.order_id}/${item.item_no}/increase`
+        )
+        .then(() => {
+          item.amount += 1;
+          item.total_price += item.price;
+          this.order.total_price += item.price;
+          this.order.quantity_item += 1;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    addNewItem(menu) {
+      axios
+        .post(`http://localhost:3000/order/${this.order.order_id}/add`, {
+          menu: menu,
+        })
+        .then((res) => {
+          var newOrderItem = {
+            item_no: res.data.item_no,
+            total_price: menu.menu_price,
+            amount: 1,
+            price: menu.menu_price,
+            order_id: this.order.order_id,
+            menu_id: menu.menu_id,
+          };
+
+          this.orderItems.push(newOrderItem);
+          this.order.total_price += newOrderItem.price;
+          this.order.quantity_item += 1;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
-  created() {},
+  computed: {
+    sortedMenus() {
+      var menus = this.menus.concat([]);
+      if (this.sortBy === "lowerPrice" && this.customer.account_id === null) {
+        menus.sort((a, b) => (a.menu_price < b.menu_price ? -1 : 1));
+      } else if (
+        this.sortBy === "higherPrice" &&
+        this.customer.account_id === null
+      ) {
+        menus.sort((a, b) => (a.menu_price > b.menu_price ? -1 : 1));
+      } else if (
+        this.sortBy === "lowerPrice" &&
+        this.customer.account_id !== null
+      ) {
+        menus.sort((a, b) => (a.member_price < b.member_price ? -1 : 1));
+      } else if (
+        this.sortBy === "higherPrice" &&
+        this.customer.account_id !== null
+      ) {
+        menus.sort((a, b) => (a.member_price > b.member_price ? -1 : 1));
+      }
+      return menus.filter((val) =>
+        val.menu_name
+          .toLowerCase()
+          .includes(this.searchQuery.trim().toLowerCase())
+      );
+    },
+  },
+  created() {
+    this.tableId = this.$route.params.tableId;
+    axios
+      .get(`http://localhost:3000/table/${this.tableId}/order`)
+      .then((res) => {
+        this.menus = res.data.menus;
+        this.order = res.data.order;
+        this.orderItems = res.data.orderItems;
+        this.customer = res.data.customer;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  },
   mounted() {
     this.$refs.container.style.minHeight = window.outerHeight + "px";
     var height = this.$refs.container.children[0].children[0].clientHeight;
