@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import axios from "axios";
+import axios from "axios";
 
 Vue.use(VueRouter)
 
@@ -60,6 +60,11 @@ const routes = [
     name: 'Completed',
     component: () => import('../views/customer/CompletedPage.vue')
   },
+  {
+    path: '/404',
+    name: 'NotFound',
+    component: () => import('../views/NotFoundPage.vue')
+  },
 ]
 
 const router = new VueRouter({
@@ -73,41 +78,48 @@ router.beforeEach(async (to, from, next) => {
   console.log('to: \n', to)
 
   var managerPath = ['ManagerLogin', 'ManagerTables', 'ManagerMenus', 'ManagerProfile']
-  if (managerPath.includes(to.name) || to.query.login === 'required') { // second condition for test
+  if (managerPath.includes(to.name) || to.path === '/manager' || to.query.login === 'required') { // second condition for test
     return next()
   }
 
-  next()
+  if (to.name === 'NotFound') {
+    return next()
+  }
 
-  // var tableId = to.params.tableId
-  // axios
-  //   .get(`http://localhost:3000/table/${tableId}/status`)
-  //   .then(res => {
-  //     var token = localStorage.getItem('token')
-  //     if (!token) {
-  //       return next({ name: 'Home', params: { tableId: tableId }, query: { login: 'required' } })
-  //     }
+  var servicePath = ['Home', 'Menu', 'Order', 'Waiting', 'Served', 'Billing', 'Completed']
+  if (!servicePath.includes(to.name) || to.params.tableId <= 0 || to.params.tableId > 15) {
+    return next({ name: 'NotFound', meta: { pass: true } })
+  }
 
-  //     var status = res.data.status
-  //     if (status === null && to.name !== 'Home' && tableId) {
-  //       next({ name: 'Home', params: { tableId: tableId } })
-  //     } else if (status === 'created' && ['Menu', 'Order'].includes(to.name)) {
-  //       next()
-  //     } else if (status === 'created' && !['Menu', 'Order'].includes(to.name)) {
-  //       next({ name: 'Menu', params: { tableId: tableId } })
-  //     } else if (status === 'pending' && to.name !== 'Waiting') {
-  //       next({ name: 'Waiting', params: { tableId: tableId } })
-  //     } else if (status === 'served' && to.name !== 'Served') {
-  //       next({ name: 'Served', params: { tableId: tableId } })
-  //     } else if (status === 'billing' && to.name !== 'Billing') {
-  //       next({ name: 'Billing', params: { tableId: tableId } })
-  //     } else {
-  //       next()
-  //     }
-  //   })
-  //   .catch(err => {
-  //     console.log(err)
-  //   })
+  var tableId = to.params.tableId
+  axios
+    .get(`http://localhost:3000/table/${tableId}/status`)
+    .then(res => {
+      // var token = localStorage.getItem('token')
+      // if (!token) {
+      //   return next({ name: 'Home', params: { tableId: tableId }, query: { login: 'required' } })
+      // }
+
+      var status = res.data.status
+      if (status === null && to.name !== 'Home' && tableId) {
+        next({ name: 'Home', params: { tableId: tableId } })
+      } else if (status === 'created' && ['Menu', 'Order'].includes(to.name)) {
+        next()
+      } else if (status === 'created' && !['Menu', 'Order'].includes(to.name)) {
+        next({ name: 'Menu', params: { tableId: tableId } })
+      } else if (status === 'pending' && to.name !== 'Waiting') {
+        next({ name: 'Waiting', params: { tableId: tableId } })
+      } else if (status === 'served' && to.name !== 'Served') {
+        next({ name: 'Served', params: { tableId: tableId } })
+      } else if (status === 'billing' && to.name !== 'Billing') {
+        next({ name: 'Billing', params: { tableId: tableId } })
+      } else {
+        next()
+      }
+    })
+    .catch(err => {
+      console.log(err)
+    })
 })
 
 

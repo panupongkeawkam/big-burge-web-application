@@ -10,23 +10,45 @@
             <div
               class="d-flex flex-column align-items-center pt-3 text-light bg-theme-2"
               style="
-              width: 6% !important;
+              width: 7% !important;
               font-size: 1.8em;
               border-radius: 1rem 0 0 1rem;
             "
             >
               <div class="my-3 clickable">
-                <router-link to="/manager/tables">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/tables"
+                >
                   <i class="fas fa-table-cells text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >TABLES</span>
                 </router-link>
               </div>
               <div class="my-3 clickable">
-                <router-link to="/manager/menus">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/menus"
+                >
                   <i class="fas fa-burger text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >MENUS</span>
                 </router-link>
               </div>
               <div class="my-3 clickable">
-                <i class="fas fa-user text-warning"></i>
+                <span
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                >
+                  <i class="fas fa-user text-warning"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >PROFILE</span>
+                </span>
               </div>
             </div>
             <div class="col py-3 px-4 d-flex flex-wrap" ref="mainCanvas">
@@ -147,7 +169,10 @@
                             class="btn btn-outline-secondary border-2 fw-bold"
                             data-bs-dismiss="modal"
                           >Cancel</button>
-                          <button class="btn btn-warning fw-bold text-light border-2" @click="saveEditPassword()">Save</button>
+                          <button
+                            class="btn btn-warning fw-bold text-light border-2"
+                            @click="saveEditPassword()"
+                          >Save</button>
                         </div>
                       </div>
                     </div>

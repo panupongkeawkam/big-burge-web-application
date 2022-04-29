@@ -10,22 +10,42 @@
             <div
               class="d-flex flex-column align-items-center pt-3 text-light bg-theme-2"
               style="
-              width: 6% !important;
+              width: 7% !important;
               font-size: 1.8em;
               border-radius: 1rem 0 0 1rem;
             "
             >
               <div class="my-3 clickable">
-                <i class="fas fa-table-cells text-warning"></i>
+                <span class="d-flex flex-column justify-content-center align-items-center">
+                  <i class="fas fa-table-cells text-warning"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >TABLES</span>
+                </span>
               </div>
               <div class="my-3 clickable">
-                <router-link to="/manager/menus">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/menus"
+                >
                   <i class="fas fa-burger text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >MENUS</span>
                 </router-link>
               </div>
               <div class="my-3 clickable">
-                <router-link to="/manager/profile">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/profile"
+                >
                   <i class="fas fa-user text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >PROFILE</span>
                 </router-link>
               </div>
             </div>
@@ -56,7 +76,7 @@
                         v-show="filter === 'created'"
                       ></div>
                     </div>
-                    <div class="fw-bold text-muted">Check In</div>
+                    <div class="fw-bold text-muted">Check-in</div>
                   </div>
                   <div
                     class="d-flex ps-2 pe-3 clickable"
@@ -140,7 +160,7 @@
                   border-radius: 1rem;
                   background: white;
                 "
-                  :style="{ filter: `opacity(${table.table_status === 'ready' ? '.3' : '1'}) brightness(${table.table_status === 'ready' ? '80%' : '100%'})` }"
+                  :style="{ filter: `opacity(${table.table_status === 'ready' ? '.3' : '1'}) brightness(${table.table_status === 'ready' ? '80%' : '100%'}) grayscale(${table.table_status === 'ready' ? '100%' : '0%'})` }"
                   v-for="(table, index) in filteredTables"
                   @click="
                   showInfo(table);
@@ -153,7 +173,7 @@
                   :key="'table' + table.table_id"
                 >
                   <div class="d-flex justify-content-between">
-                    <span class="fw-bold fs-4 text-muted">
+                    <span class="fw-bold fs-4 text-theme-3">
                       {{
                       (table.table_id + 100).toString().slice(1)
                       }}
@@ -185,13 +205,20 @@
                       ></i>
                     </span>
                   </div>
-                  <div class="d-flex flex-column">
-                    <span class="text-muted fw-bold mb-1" style="opacity: 0.5">Steve Rogers</span>
+                  <div class="d-flex flex-column fs-5">
                     <span
                       class="text-muted fw-bold"
-                    >{{ table.table_status === 'ready' ? '' : table.quantity_item + ' Item' }}</span>
+                      style="opacity: 0.5"
+                      v-if="table.table_status !== 'ready'"
+                    >{{ table.full_name || '' }}</span>
                     <span
-                      class="text-muted fw-bold fs-5"
+                      class="text-muted fw-bold"
+                      style="opacity: 0.75"
+                      v-if="table.table_status !== 'ready'"
+                    >{{ table.quantity_item + ' Item' }}</span>
+                    <span
+                      class="fw-bold text-muted"
+                      style="opacity: 0.75"
                     >{{ table.table_status === 'ready' ? '--.--' : (table.total_price).toFixed(2) + '฿' }}</span>
                   </div>
                 </div>
@@ -232,7 +259,7 @@
                 >
                   <span>
                     <i class="fas fa-clipboard-list me-2" style="font-size: 1.5em; color: #39c8ef"></i>
-                    <span class="fw-bold text-muted">Created</span>
+                    <span class="fw-bold text-muted">Check-in</span>
                   </span>
                 </div>
                 <div
@@ -277,39 +304,50 @@
                   v-for="item in displayOrderItems"
                   :key="'item' + item.item_no"
                 >
-                  <div class="col-11 fw-bold text-theme-2">{{ item.menu_name }}</div>
+                  <div class="col-11 fs-5 text-theme-3">{{ item.menu_name }}</div>
                   <div class="col-1 fw-bold text-muted">x{{ item.amount }}</div>
                 </div>
               </div>
               <section ref="tableInfoSummary">
                 <div class="d-flex pe-4 py-3 flex-wrap">
                   <div
-                    class="d-flex flex-column px-4 py-3 bg-theme-4 me-2 mb-2"
+                    class="d-flex flex-column px-4 py-3 border me-2 mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
-                    <span class="fw-bold text-muted" style="font-size: 0.8em">Customer Name</span>
-                    <span class="fs-5 fw-bold text-theme-2">{{ displayCustomer.full_name }}</span>
+                    <span
+                      class="fw-bold text-muted"
+                      style="font-size: 0.8em; opacity: 0.75"
+                    >Customer Name</span>
+                    <span class="fs-5 fw-bold text-muted">{{ displayCustomer.full_name }}</span>
                   </div>
                   <div
-                    class="d-flex flex-column px-4 py-3 bg-theme-4 mb-2"
+                    class="d-flex flex-column px-4 py-3 border mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
-                    <span class="fw-bold text-muted" style="font-size: 0.8em">Check In Time</span>
-                    <span class="fs-5 fw-bold text-theme-2">{{ displayCustomer.check_in }}</span>
+                    <span
+                      class="fw-bold text-muted"
+                      style="font-size: 0.8em; opacity: 0.75"
+                    >Check-in Time</span>
+                    <span class="fs-5 fw-bold text-muted">{{ displayCustomer.check_in }}</span>
                   </div>
                   <div
-                    class="d-flex flex-column px-4 py-3 bg-theme-4 me-2 mb-2"
+                    class="d-flex flex-column px-4 py-3 border me-2 mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
-                    <span class="fw-bold text-muted" style="font-size: 0.8em">Item Amount</span>
-                    <span class="fs-3 fw-bold text-theme-2">{{ displayTable.quantity_item }}</span>
+                    <span
+                      class="fw-bold text-muted"
+                      style="font-size: 0.8em; opacity: 0.75"
+                    >Item Amount</span>
+                    <span class="fs-3 fw-bold text-muted">{{ displayTable.quantity_item }}</span>
                   </div>
                   <div
-                    class="d-flex flex-column px-4 py-3 bg-theme-4 mb-2"
+                    class="d-flex flex-column px-4 py-3 border mb-2"
                     style="border-radius: 1rem; width: calc(50% - 0.25rem)"
                   >
-                    <span class="fw-bold text-muted" style="font-size: 0.8em">Total</span>
-                    <span class="fs-3 fw-bold text-theme-2">{{ displayTable.total_price }}฿</span>
+                    <span class="fw-bold text-muted" style="font-size: 0.8em; opacity: 0.75">Total</span>
+                    <span
+                      class="fs-3 fw-bold text-muted"
+                    >{{ displayTable.total_price ? displayTable.total_price.toFixed(2) : '--.--' }}฿</span>
                   </div>
                 </div>
                 <div class="d-flex justify-content-end pe-4">
@@ -332,7 +370,7 @@
                     v-if="['created', 'pending'].includes(displayTable.status)"
                     data-bs-toggle="modal"
                     data-bs-target="#cancelOrderModal"
-                  >Cancel Order</button>
+                  >Cancel</button>
                 </div>
               </section>
             </div>
@@ -416,7 +454,7 @@ export default {
       this.displayTable = {};
       this.displayOrderItems = [];
       this.displayCustomer = {};
-      this.displayOrderIndex = -1
+      this.displayOrderIndex = -1;
 
       var el = this.$refs["tableInfo"];
       el.style.animation = "hide .3s";
@@ -431,7 +469,7 @@ export default {
         if (
           a.status === "pending" &&
           b.status === "pending" &&
-          new Date(a.ordering_time) > new Date(b.ordering_time)
+          new Date(a.ordering_time) < new Date(b.ordering_time)
         ) {
           return -1;
         } else if (a.status === "pending" && b.status !== "pending") {
@@ -453,9 +491,9 @@ export default {
     serveOrder() {
       axios
         .put(`http://localhost:3000/order/${this.displayTable.order_id}/serve`)
-        .then(res => {
-          console.log(res)
-          window.location.reload()
+        .then((res) => {
+          console.log(res);
+          window.location.reload();
         })
         .catch((err) => {
           console.log(err);
@@ -463,10 +501,12 @@ export default {
     },
     cancelOrder() {
       axios
-        .delete(`http://localhost:3000/order/${this.displayTable.order_id}/cancel`)
-        .then(res => {
-          console.log(res)
-          window.location.reload()
+        .delete(
+          `http://localhost:3000/order/${this.displayTable.order_id}/cancel`
+        )
+        .then((res) => {
+          console.log(res);
+          window.location.reload();
         })
         .catch((err) => {
           console.log(err);
@@ -474,15 +514,17 @@ export default {
     },
     completeOrder() {
       axios
-        .post(`http://localhost:3000/order/${this.displayTable.order_id}/completed`)
-        .then(res => {
-          console.log(res)
-          window.location.reload()
+        .post(
+          `http://localhost:3000/order/${this.displayTable.order_id}/completed`
+        )
+        .then((res) => {
+          console.log(res);
+          window.location.reload();
         })
         .catch((err) => {
           console.log(err);
         });
-    }
+    },
   },
   created() {
     axios

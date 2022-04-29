@@ -54,7 +54,7 @@
     >
       <div class="col-4 d-flex justify-content-start">
         <img
-          :src=" menu.image_file_path || 'https://bulma.io/images/placeholders/128x128.png'"
+          :src="menu.image_file_path ?  `http://localhost:3000${menu.image_file_path}` : 'http://localhost:3000/image-not-found.png'"
           class="rounded"
           style="width: 96px; height: 96px; object-fit: cover"
           alt

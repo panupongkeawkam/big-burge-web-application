@@ -28,7 +28,7 @@
       >
         <div class="col-4 d-flex justify-content-start">
           <img
-            :src="getImageFileName(item.menu_id) || 'https://bulma.io/images/placeholders/128x128.png'"
+            :src="getImageFileName(item.menu_id)"
             class="rounded"
             style="width: 96px; height: 96px; object-fit: cover"
             alt
@@ -126,7 +126,11 @@ export default {
       return this.menus.find((val) => val.menu_id === menuId).menu_name;
     },
     getImageFileName(menuId) {
-      return this.menus.find((val) => val.menu_id === menuId).image_file_path;
+      var image_file_path = this.menus.find((val) => val.menu_id === menuId).image_file_path
+      if (!image_file_path) {
+        return `http://localhost:3000/image-not-found.png`
+      }
+      return `http://localhost:3000${image_file_path}`;
     },
     remove(item) {
       if (item.amount === 1) {

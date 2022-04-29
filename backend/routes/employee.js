@@ -1,13 +1,28 @@
 const express = require('express')
 const pool = require('../config')
+const fs = require("fs");
+const multer = require("multer");
 
 router = express.Router()
+
+const storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, "./public/images");
+  },
+  filename: function (req, file, callback) {
+    callback(
+      null,
+      "menu_" + Date.now() + "_" + file.originalname
+    );
+  },
+});
+const upload = multer({ storage: storage });
 
 function formatDate(dateFormat) {
   var datetime = new Date(dateFormat)
   var date = `${datetime.getFullYear()}/${((datetime.getMonth() + 1) + 1000).toString().slice(2)}/${(datetime.getDate() + 1000).toString().slice(2)}`
   var time = `${(datetime.getHours() + 1000).toString().slice(2)}:${(datetime.getMinutes() + 1000).toString().slice(2)}:${(datetime.getSeconds() + 1000).toString().slice(2)}`
-  dateFormat = `${datetime.getDate() === new Date().getDate() ? 'To Day' : date} ${time}`
+  dateFormat = `${datetime.getDate() === new Date().getDate() ? 'Today' : date} ${time}`
   return dateFormat;
 }
 
@@ -73,12 +88,6 @@ router.get('/tables', async (req, res) => {
     for (var table of tables) {
       if (table.table_status === 'not_ready') {
         var order = orders.find(order => order.table_number === table.table_id)
-        if (order.ordering_time !== null) {
-          order.ordering_time = formatDate(order.ordering_time)
-        }
-        if (order.served_time !== null) {
-          order.served_time = formatDate(order.served_time)
-        }
         for (var cust of customer) {
           if (cust.table_id === table.table_id) {
             var fullName = { full_name: cust.full_name }
@@ -295,17 +304,18 @@ router.post('/order/:orderId/completed', async (req, res) => {
 })
 
 // add new menu
-router.post('/menu', async (req, res) => {
+router.post('/menu', upload.single("image"), async (req, res) => {
+  var file_path = "/images/" + req.file.filename
   var menu_name = req.body.menu_name
   var menu_price = req.body.menu_price
-  var member_price = req.body.member_price
+  var member_price = req.body.member_price === 'null' ? null : req.body.member_price
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
     const [row1, field1] = await conn.query(
-      `INSERT INTO menu (menu_name, menu_price, member_price, create_date, menu_status)
-      VALUES(?,?,?,NOW(),?)`,
-      [menu_name, menu_price, member_price, 'ready']
+      `INSERT INTO menu (menu_name, menu_price, member_price, create_date, menu_status, image_file_path)
+      VALUES(?,?,?,NOW(),?,?)`,
+      [menu_name, menu_price, member_price, 'ready', file_path]
     )
 
     const [menu, field] = await conn.query(
@@ -314,6 +324,7 @@ router.post('/menu', async (req, res) => {
       WHERE menu_id = ?`,
       [row1.insertId]
     )
+
     menu[0].create_date = formatDate(menu[0].create_date)
     await conn.commit()
     res.json({ menu: menu[0] })
@@ -328,29 +339,41 @@ router.post('/menu', async (req, res) => {
 })
 
 // update menu
-router.put('/menu/:menuId', async (req, res) => {
+router.put('/menu/:menuId', upload.single("image"), async (req, res) => {
   var menu_name = req.body.menu_name
   var menu_price = req.body.menu_price
-  var member_price = req.body.member_price
+  var member_price = req.body.member_price === 'null' ? null : req.body.member_price
   var menu_status = req.body.menu_status
 
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
-    const [menu, field] = await conn.query(
-      `UPDATE menu
-      SET menu_name = ?, menu_price = ?, member_price = ?, menu_status = ?
-      WHERE menu_id = ?`,
-      [menu_name, menu_price, member_price, menu_status, req.params.menuId]
-    )
+    if (req.file) {
+      var file_path = "/images/" + req.file.filename
+      const [menu, field] = await conn.query(
+        `UPDATE menu
+        SET menu_name = ?, menu_price = ?, member_price = ?, menu_status = ?, image_file_path = ?
+        WHERE menu_id = ?`,
+        [menu_name, menu_price, member_price, menu_status, file_path, req.params.menuId]
+      )
+    }
+    else{
+      const [menu, field] = await conn.query(
+        `UPDATE menu
+        SET menu_name = ?, menu_price = ?, member_price = ?, menu_status = ?
+        WHERE menu_id = ?`,
+        [menu_name, menu_price, member_price, menu_status, req.params.menuId]
+      )
+    }
 
     await conn.commit()
     res.json({
-      menus: {
+      menu: {
         menu_name: menu_name,
         menu_price: menu_price,
         member_price: member_price,
-        menu_status: menu_status
+        menu_status: menu_status,
+        image_file_path: file_path
       }
     })
   }

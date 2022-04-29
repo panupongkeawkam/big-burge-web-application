@@ -3,6 +3,14 @@ const pool = require('../config')
 
 router = express.Router()
 
+function formatDate(dateFormat, today=false) {
+  var datetime = new Date(dateFormat)
+  var date = `${datetime.getFullYear()}/${((datetime.getMonth() + 1) + 1000).toString().slice(2)}/${(datetime.getDate() + 1000).toString().slice(2)}`
+  var time = `${(datetime.getHours() + 1000).toString().slice(2)}:${(datetime.getMinutes() + 1000).toString().slice(2)}:${(datetime.getSeconds() + 1000).toString().slice(2)}`
+  dateFormat = `${datetime.getDate() === new Date().getDate() && today ? 'Today' : date} ${time}`
+  return dateFormat;
+}
+
 // customer login
 router.post('/table/:tableId/login', async (req, res) => {
   // validation then create new order and serviced_customer
@@ -357,8 +365,109 @@ router.post('/table/:tableId/billing', async (req, res) => {
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
+    const [[order]] = await conn.query(
+      `SELECT * FROM \`order\` 
+      WHERE table_id = ? AND \`status\` != 'completed'`,
+      [req.params.tableId]
+    )
+
+    const [row1, field1] = await conn.query(
+      `UPDATE \`order\`
+      SET \`status\` = 'billing'
+      WHERE table_id = ? AND \`status\` != 'completed' `,
+      [req.params.tableId]
+    )
+
+    const [receipts, field2] = await conn.query(
+      `SELECT receipt_no
+      FROM receipt`
+    )
+
+    var generator = () => {
+      var str = ''
+      for (var i = 0; i < 10; i++) {
+        str += Math.floor(Math.random() * 10)
+      }
+      return str
+    }
+
+    var receiptNo = generator()
+    while (receipts.includes(receiptNo)) {
+      receiptNo = random()
+    }
+
+    const [row2, field3] = await conn.query(
+      `INSERT INTO receipt (create_date, receipt_no, order_id)
+      VALUES (NOW(), ?, ?)`,
+      [receiptNo, order.order_id]
+    )
+
     await conn.commit()
     res.status(200).send()
+  }
+  catch (err) {
+    await conn.rollback()
+    res.status(500).send(err)
+  }
+  finally {
+    conn.release()
+  }
+})
+
+router.get('/table/:tableId/billing', async (req, res) => {
+  const conn = await pool.getConnection()
+  await conn.beginTransaction()
+  try {
+    const [[order]] = await conn.query(
+      `SELECT * FROM \`order\`
+      WHERE table_id = ? AND \`status\` != 'completed'`,
+      [req.params.tableId]
+    )
+
+    const [[receipt]] = await conn.query(
+      `SELECT create_date, receipt_no
+      FROM receipt
+      WHERE order_id = ?`,
+      [order.order_id]
+    )
+
+    const [customer, field] = await conn.query(
+      `SELECT CONCAT(fname, ' ', lname) AS \`full_name\`, check_in
+      FROM \`order\`
+      JOIN serviced_customer AS sc
+      USING (serviced_id)
+      JOIN customer_member AS cm
+      ON (sc.account_id IS NOT NULL AND sc.account_id = cm.account_id)
+      JOIN \`account\` AS a
+      ON (cm.account_id = a.account_id)
+      WHERE table_id = ? AND \`status\` != 'completed' `,
+      [req.params.tableId]
+    )
+
+    const [[normal]] = await conn.query(
+      `SELECT check_in
+      FROM \`order\`
+      JOIN serviced_customer
+      USING(serviced_id)
+      WHERE order_id = ?`,
+      [order.order_id]
+    )
+
+    data = customer.length > 0 ? customer[0] : { full_name: null, check_in: normal.check_in }
+
+    const [orderItems, field2] = await conn.query(
+      `SELECT m.menu_name, oi.*, m.image_file_path
+        FROM order_item AS oi
+        JOIN menu AS m
+        USING(menu_id)
+        WHERE order_id = ?`,
+      [order.order_id]
+    )
+
+    data.check_in = formatDate(data.check_in, false)
+    receipt.create_date = formatDate(receipt.create_date)
+    await conn.commit()
+    res.json({ order: order, receipt: receipt, customer: data, orderItems: orderItems })
   }
   catch (err) {
     await conn.rollback()

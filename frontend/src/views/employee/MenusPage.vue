@@ -10,22 +10,42 @@
             <div
               class="d-flex flex-column align-items-center pt-3 text-light bg-theme-2"
               style="
-              width: 6% !important;
+              width: 7% !important;
               font-size: 1.8em;
               border-radius: 1rem 0 0 1rem;
             "
             >
               <div class="my-3 clickable">
-                <router-link to="/manager/tables">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/tables"
+                >
                   <i class="fas fa-table-cells text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >TABLES</span>
                 </router-link>
               </div>
               <div class="my-3 clickable">
-                <i class="fas fa-burger text-warning"></i>
+                <span class="d-flex flex-column justify-content-center align-items-center">
+                  <i class="fas fa-burger text-warning"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >MENUS</span>
+                </span>
               </div>
               <div class="my-3 clickable">
-                <router-link to="/manager/profile">
+                <router-link
+                  class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
+                  to="/manager/profile"
+                >
                   <i class="fas fa-user text-light"></i>
+                  <span
+                    class="mt-2 text-light"
+                    style="font-size: 12px !important; opacity: .75"
+                  >PROFILE</span>
                 </router-link>
               </div>
             </div>
@@ -109,23 +129,25 @@
                         />
                       </div>
                       <span v-show="editingMenuIndex !== index">
-                        <i
-                          class="fas fa-circle mx-2 me-3"
-                          style="color: #31d475; font-size: .8em"
-                          v-show="menu.menu_status === 'ready'"
-                        ></i>
-                        <i
-                          class="fas fa-circle mx-2 me-3"
-                          style="color: #bc2c3b; font-size: .8em"
-                          v-show="menu.menu_status === 'not_ready'"
-                        ></i>
+                        <span v-show="menu.menu_status === 'ready'">
+                          <i
+                            class="fas fa-circle mx-2 me-3"
+                            style="color: #31d475; font-size: .8em"
+                          ></i>
+                        </span>
+                        <span v-show="menu.menu_status === 'not_ready'">
+                          <i
+                            class="fas fa-circle mx-2 me-3"
+                            style="color: #bc2c3b; font-size: .8em"
+                          ></i>
+                        </span>
                       </span>
                       <div style="height: 128px; position: relative">
                         <div v-if="editingMenuIndex === index">
                           <img
                             class="rounded"
                             :class="{'border border-danger': error.editImageFile}"
-                            :src="imageDecode(editMenu.imageFile)"
+                            :src="editMenu.imageURL"
                             style="height: 128px; width: 128px; object-fit: cover"
                           />
                           <div
@@ -140,7 +162,7 @@
                         </div>
                         <img
                           class="rounded"
-                          :src="menu.image_file_path || 'https://bulma.io/images/placeholders/128x128.png'"
+                          :src="menu.image_file_path ? `http://localhost:3000/${menu.image_file_path}` : 'http://localhost:3000/image-not-found.png'"
                           style="height: 128px; width: 128px; object-fit: cover"
                           v-else
                         />
@@ -161,7 +183,7 @@
                       </div>
                       <div class="col-4 p-2">
                         <input
-                          class="form-control m-0 p-2 fs-5"
+                          class="form-control m-0 p-2 fs-5 fw-bold text-theme-3"
                           :class="{'is-invalid': error.editPrice}"
                           v-model="editMenu.price"
                           placeholder="Price"
@@ -172,8 +194,9 @@
                       </div>
                       <div class="col-4 p-2" style="color: #fc8845">
                         <input
-                          class="form-control m-0 p-2 fs-5"
+                          class="form-control m-0 p-2 fs-5 fw-bold"
                           :class="{'is-invalid': error.editDiscount}"
+                          style="color: #fc8845"
                           v-model="editMenu.discount"
                           placeholder="Discount"
                           type="number"
@@ -216,17 +239,6 @@
                           @click="deleteMenu.name = menu.menu_name; deleteMenu.id = menu.menu_id"
                         >Delete</button>
                       </div>
-                      <!-- <i class="fas fa-pen text-warning fs-5"></i> -->
-                    </div>
-                  </div>
-                  <div class="col-3 d-flex justify-content-end">
-                    <div v-if="false">
-                      <input
-                        class="form-control mt-3"
-                        style="width: 128px"
-                        type="file"
-                        accept="image/*"
-                      />
                     </div>
                   </div>
                 </div>
@@ -237,7 +249,6 @@
                   <div class="col-12 d-flex flex-wrap">
                     <div class="mb-3 fw-bold text-muted">Menu Info</div>
                     <div class="col-12 mb-3">
-                      <!-- <label class="form-label text-muted fw-bold">Menu Name</label> -->
                       <input
                         type="text"
                         class="form-control py-3 px-4"
@@ -247,7 +258,6 @@
                       />
                     </div>
                     <div class="col-6 mb-3 pe-3">
-                      <!-- <label class="form-label text-muted fw-bold">Menu Price</label> -->
                       <input
                         type="number"
                         class="form-control py-3 px-4"
@@ -257,7 +267,6 @@
                       />
                     </div>
                     <div class="col-6 mb-4">
-                      <!-- <label class="form-label text-muted fw-bold">Discount (for member)</label> -->
                       <input
                         type="number"
                         class="form-control py-3 px-4"
@@ -265,7 +274,6 @@
                         v-model="newMenu.discount"
                         placeholder="Discount (optional)"
                       />
-                      <!-- <div class="form-text">Optional</div> -->
                     </div>
                     <div class="mb-3 fw-bold text-muted">Menu Image</div>
                     <div>
@@ -362,6 +370,7 @@ export default {
         discount: "",
         status: "",
         imageFile: "",
+        imageURL: "",
       },
       deleteMenu: {
         id: "",
@@ -397,6 +406,7 @@ export default {
 
       input.onchange = (e) => {
         this.editMenu.imageFile = e.target.files[0];
+        this.editMenu.imageURL = this.imageDecode(e.target.files[0]);
       };
 
       input.click();
@@ -434,7 +444,7 @@ export default {
         axios
           .post(`http://localhost:3000/menu`, formData)
           .then((res) => {
-            this.menus.push(res.data.menus[0]);
+            this.menus.push(res.data.menu);
             this.newMenu.name = "";
             this.newMenu.price = "";
             this.newMenu.discount = "";
@@ -451,10 +461,10 @@ export default {
       this.editMenu.price = menu.menu_price;
       this.editMenu.discount = menu.member_price || "";
       this.editMenu.status = menu.menu_status === "ready";
-      this.editMenu.imageFile = this.imageDecode(
-        menu.image_file_path ||
-          "https://bulma.io/images/placeholders/128x128.png"
-      );
+      this.editMenu.imageURL = menu.image_file_path
+        ? `http://localhost:3000/${menu.image_file_path}`
+        : "http://localhost:3000/image-not-found.png";
+      this.editMenu.imageFile = "";
     },
     saveEdit() {
       this.editMenu.name = this.editMenu.name.trim();
@@ -496,11 +506,14 @@ export default {
             var targetMenu = this.menus.find(
               (val) => val.menu_id === this.editMenu.id
             );
-            var data = res.data.menus;
-            targetMenu.menu_name = data.menu_name;
-            targetMenu.menu_price = data.menu_price;
-            targetMenu.member_price = data.member_price;
-            targetMenu.menu_status = data.menu_status;
+            var menu = res.data.menu;
+            targetMenu.menu_name = menu.menu_name;
+            targetMenu.menu_price = menu.menu_price;
+            targetMenu.member_price = menu.member_price;
+            targetMenu.menu_status = menu.menu_status;
+            if (menu.image_file_path) {
+              targetMenu.image_file_path = menu.image_file_path;
+            }
             this.editingMenuIndex = -1;
           })
           .catch((err) => {
@@ -517,6 +530,7 @@ export default {
               (val) => val.menu_id === this.deleteMenu.id
             );
             this.menus.splice(targetIndex, 1);
+            this.editingMenuIndex = -1;
           }
         })
         .catch((err) => {
@@ -539,7 +553,9 @@ export default {
         menus.sort((a, b) => (a.menu_price > b.menu_price ? -1 : 1));
       }
       return menus.filter((val) =>
-        val.menu_name.toLowerCase().includes(this.searchQuery.trim().toLowerCase())
+        val.menu_name
+          .toLowerCase()
+          .includes(this.searchQuery.trim().toLowerCase())
       );
     },
   },

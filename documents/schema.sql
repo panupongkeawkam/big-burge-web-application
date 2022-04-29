@@ -142,13 +142,13 @@ VALUES
   (5, 'ready'), 
   (6, 'ready'), 
   (7, 'ready'), 
-  (8, 'ready'); 
+  (8, 'ready'),
   (9, 'ready'), 
   (10, 'ready'), 
   (11, 'ready'), 
-  (12, 'ready');
-  (13, 'ready');
-  (14, 'ready');
+  (12, 'ready'),
+  (13, 'ready'),
+  (14, 'ready'),
   (15, 'ready');
 
 DROP TABLE IF EXISTS `order_item`;

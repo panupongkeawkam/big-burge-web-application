@@ -12,16 +12,35 @@
     <button
       class="btn btn-outline-light border-2 fs-5 py-3 fw-bold w-75"
       type="button"
+      @click="checkBill()"
     >Check Bill</button>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {};
   },
-  methods: {},
+  methods: {
+    checkBill() {
+      axios
+        .post(
+          `http://localhost:3000/table/${this.$route.params.tableId}/billing`
+        )
+        .then(() => {
+          this.$router.push({
+            name: "Billing",
+            params: { tableId: this.$route.params.tableId },
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+  },
   mounted() {
     this.$refs.container.style.height = window.outerHeight + "px";
 
