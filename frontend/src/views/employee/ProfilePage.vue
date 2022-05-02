@@ -214,11 +214,12 @@
 </style>
 
 <script>
-// import axios from "axios";
+// import axios from "@/plugins/axios";
 
 export default {
   data() {
     return {
+      account: null,
       showPassword: false,
       oldPassword: "gg12345",
       newPassword: "",
@@ -228,7 +229,9 @@ export default {
     logout() {},
     saveEditPassword() {},
   },
-  created() {},
+  created() {
+    this.account = this.$attrs.account
+  },
   mounted() {
     var currentHeight = window.innerHeight;
     this.$refs["container"].style.height = currentHeight + "px";

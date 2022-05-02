@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from "@/plugins/axios";
 
 export default {
   data() {
@@ -100,13 +100,20 @@ export default {
   },
   methods: {
     login() {
+      if (this.username === "" || this.password === "") {
+        this.error = true;
+        return;
+      }
+
       axios
         .post("http://localhost:3000/manager/login", {
           username: this.username,
           password: this.password,
         })
         .then((res) => {
-          console.log(res);
+          var token = res.data.token;
+          localStorage.setItem("token", token);
+          this.$emit("auth-change");
           this.$router.push("/manager/tables");
         })
         .catch((err) => {

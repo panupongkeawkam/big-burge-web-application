@@ -2,6 +2,7 @@ const express = require('express')
 const pool = require('../config')
 const fs = require("fs");
 const multer = require("multer");
+const { isLoggedIn } = require('../middlewares');
 
 router = express.Router()
 
@@ -26,14 +27,56 @@ function formatDate(dateFormat) {
   return dateFormat;
 }
 
+function generateToken(){
+  const result = [];
+    const characters = '*/=-$#!@^&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < 100; i++) {
+      result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
+   }
+   return result.join('');
+}
+
 // employee login
 router.post('/manager/login', async (req, res) => {
-  var body = req.body
-  res.status(200).send()
+  const username = req.body.username
+  const password = req.body.password
+  const conn = await pool.getConnection()
+  await conn.beginTransaction()
+  try {
+    const [[user]] = await conn.query(
+      `SELECT * FROM account
+      WHERE username = ? AND password = ?`,
+      [username, password]
+    )
+    if (!user) {
+      await conn.rollback()
+      return res.status(500).send(err)
+    }
+
+    let today = new Date()
+    let tempDate = new Date()
+    let endDate = new Date(tempDate.setHours(tempDate.getHours() + 18))
+    const token = generateToken()
+    const[users, field2] = await conn.query(
+      `INSERT INTO token (token , start_date, end_date, account_id)
+      VALUES(?, ?, ?, ?)`,
+      [token, today, endDate, user.account_id]
+    )
+
+    await conn.commit()
+    res.json({token: token})
+  }
+  catch (err) {
+    await conn.rollback()
+    res.status(500).send(err)
+  }
+  finally {
+    conn.release()
+  }
 })
 
 // add middle ware
-router.get('/manager/account', async (req, res) => {
+router.get('/manager/account', isLoggedIn, async (req, res) => {
   res.json({ account: req.user })
 })
 
@@ -362,7 +405,7 @@ router.put('/menu/:menuId', upload.single("image"), async (req, res) => {
         [menu_name, menu_price, member_price, menu_status, file_path, req.params.menuId]
       )
     }
-    else{
+    else {
       const [menu, field] = await conn.query(
         `UPDATE menu
         SET menu_name = ?, menu_price = ?, member_price = ?, menu_status = ?
