@@ -32,6 +32,11 @@ router.post('/manager/login', async (req, res) => {
   res.status(200).send()
 })
 
+// add middle ware
+router.get('/manager/account', async (req, res) => {
+  res.json({ account: req.user })
+})
+
 // get all menu
 router.get('/menus', async (req, res) => {
   // need all menus, except deleted menu

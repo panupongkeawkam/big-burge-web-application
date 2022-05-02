@@ -132,7 +132,19 @@ export default {
           console.log(err);
         });
     },
-    async login() {},
+    async login() {
+      axios
+        .post(`http://localhost:3000/table/${this.tableId}/login`, {
+          username: this.username,
+          password: this.password
+        })
+        .then(() => {
+          this.$router.push(`/table/${this.tableId}/menu`);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
   created() {
     this.tableId = this.$route.params.tableId;

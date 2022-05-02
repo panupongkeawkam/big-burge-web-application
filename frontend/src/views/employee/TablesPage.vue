@@ -347,7 +347,7 @@
                     <span class="fw-bold text-muted" style="font-size: 0.8em; opacity: 0.75">Total</span>
                     <span
                       class="fs-3 fw-bold text-muted"
-                    >{{ displayTable.total_price ? displayTable.total_price.toFixed(2) : '--.--' }}฿</span>
+                    >{{ displayTable.total_price ? displayTable.total_price.toFixed(2) : '0.00' }}฿</span>
                   </div>
                 </div>
                 <div class="d-flex justify-content-end pe-4">

@@ -16,6 +16,7 @@ router.post('/table/:tableId/login', async (req, res) => {
   // validation then create new order and serviced_customer
   const conn = await pool.getConnection()
   await conn.beginTransaction()
+  
   try {
     const [users, field] = await conn.query(
       `SELECT * 
@@ -33,8 +34,8 @@ router.post('/table/:tableId/login', async (req, res) => {
       )
 
       const [row2, field2] = await conn.query(
-        `INSERT INTO \`order\` (status, serviced_id, table_id)
-        VALUES ('created', ?, ?)`,
+        `INSERT INTO \`order\` (status, serviced_id, table_id, quantity_item, total_price)
+        VALUES ('created', ?, ?, 0, 0.00)`,
         [row1.insertId, req.params.tableId]
       )
 
