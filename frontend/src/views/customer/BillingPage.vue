@@ -22,10 +22,9 @@
             />
           </div>
           <div class="col-10 d-flex flex-wrap p-1 px-3">
-            <div
-              class="col-11 fw-bold d-flex align-items-center"
-              style="font-size: .9em;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-            >{{ item.menu_name }}</div>
+            <div class="col-11 fw-bold d-flex align-items-center" style="font-size: .9em;">
+              <p class="line-limit-1 m-0 p-0">{{ item.menu_name }}</p>
+            </div>
             <div
               class="col-8 text-muted d-flex align-items-center"
               style="font-size: .8em"

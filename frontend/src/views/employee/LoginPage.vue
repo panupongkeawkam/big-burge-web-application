@@ -10,6 +10,7 @@
         <h1 class="fw-bold mb-2 text-theme-2" style="white-space: nowrap">Restaurant Manager</h1>
         <p class="mb-5" style="font-size: 0.8em">
           contact us
+          <a class="text text-theme-6">63070118@it.kmitl.ac.th</a> or 
           <a class="text text-theme-6">63070132@it.kmitl.ac.th</a>
         </p>
         <div class="input-group mb-4" style="width: 60%">
@@ -80,7 +81,7 @@
           A web-site for restaurant manager, publish as a non-public web-site
           only the employee in company can login and access this site.
         </p>
-        <p class="text-light" style="opacity: 0.8">since 2022 @it.kmitl</p>
+        <p class="text-theme-4" style="opacity: 0.8">Big Burge, since 2022 @it.kmitl</p>
       </div>
     </div>
   </div>
@@ -116,8 +117,7 @@ export default {
           this.$emit("auth-change");
           this.$router.push("/manager/tables");
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
           this.error = true;
         });
     },

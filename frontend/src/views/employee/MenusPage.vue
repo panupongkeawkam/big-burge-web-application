@@ -64,6 +64,7 @@
                         type="text"
                         placeholder="Search"
                         v-model="searchQuery"
+                        @input="editingMenuIndex = -1"
                       />
                     </div>
                   </div>
@@ -74,25 +75,25 @@
                     <div class="fs-4 px-3 py-1" style="color: #888">
                       <span
                         :class="{'text-info': sortBy === 'alphabetAsc'}"
-                        @click="sortBy = sortBy === 'alphabetAsc' ? 'recent' : 'alphabetAsc'"
+                        @click="sortBy = sortBy === 'alphabetAsc' ? 'recent' : 'alphabetAsc'; editingMenuIndex = -1"
                       >
                         <i class="fas fa-arrow-down-a-z px-2 clickable"></i>
                       </span>
                       <span
                         :class="{'text-info': sortBy === 'alphabetDesc'}"
-                        @click="sortBy = sortBy === 'alphabetDesc' ? 'recent' : 'alphabetDesc'"
+                        @click="sortBy = sortBy === 'alphabetDesc' ? 'recent' : 'alphabetDesc'; editingMenuIndex = -1"
                       >
                         <i class="fas fa-arrow-down-z-a px-2 clickable"></i>
                       </span>
                       <span
                         :class="{'text-info': sortBy === 'priceAsc'}"
-                        @click="sortBy = sortBy === 'priceAsc' ? 'recent' : 'priceAsc'"
+                        @click="sortBy = sortBy === 'priceAsc' ? 'recent' : 'priceAsc'; editingMenuIndex = -1"
                       >
                         <i class="fas fa-arrow-down-1-9 px-2 clickable"></i>
                       </span>
                       <span
                         :class="{'text-info': sortBy === 'priceDesc'}"
-                        @click="sortBy = sortBy === 'priceDesc' ? 'recent' : 'priceDesc'"
+                        @click="sortBy = sortBy === 'priceDesc' ? 'recent' : 'priceDesc'; editingMenuIndex = -1"
                       >
                         <i class="fas fa-arrow-down-9-1 px-2 clickable"></i>
                       </span>
@@ -111,7 +112,7 @@
                   style="opacity: .5"
                 >No Result</div>
                 <div
-                  class="col-12 bg-light shadow-sm py-3 pe-4 mb-3"
+                  class="col-12 bg-light shadow-sm py-2 pe-2 mb-3 pe-3"
                   style="border-radius: 1rem"
                   v-for="(menu, index) in sortedMenus"
                   :key="'menu' + menu.menu_id"
@@ -126,29 +127,30 @@
                           type="checkbox"
                           @click="editMenu.status = !editMenu.status"
                           :checked="editMenu.status"
+                          style="cursor: pointer"
                         />
                       </div>
                       <span v-show="editingMenuIndex !== index">
                         <span v-show="menu.menu_status === 'ready'">
                           <i
-                            class="fas fa-circle mx-2 me-3"
-                            style="color: #31d475; font-size: .8em"
+                            class="fas fa-circle-dot mx-2 me-3"
+                            style="color: #31d475; font-size: .9em"
                           ></i>
                         </span>
                         <span v-show="menu.menu_status === 'not_ready'">
                           <i
-                            class="fas fa-circle mx-2 me-3"
-                            style="color: #bc2c3b; font-size: .8em"
+                            class="fas fa-circle-dot mx-2 me-3"
+                            style="color: #bc2c3b; font-size: .9em"
                           ></i>
                         </span>
                       </span>
-                      <div style="height: 128px; position: relative">
+                      <div style="height: 96px; position: relative">
                         <div v-if="editingMenuIndex === index">
                           <img
                             class="rounded"
                             :class="{'border border-danger': error.editImageFile}"
                             :src="editMenu.imageURL"
-                            style="height: 128px; width: 128px; object-fit: cover"
+                            style="height: 96px; width: 96px; object-fit: cover"
                           />
                           <div
                             class="edit-image rounded top-0 clickable"
@@ -163,7 +165,7 @@
                         <img
                           class="rounded"
                           :src="menu.image_file_path ? `http://localhost:3000/${menu.image_file_path}` : 'http://localhost:3000/image-not-found.png'"
-                          style="height: 128px; width: 128px; object-fit: cover"
+                          style="height: 96px; width: 96px; object-fit: cover"
                           v-else
                         />
                       </div>
@@ -171,30 +173,33 @@
                     <div class="col-6 d-flex flex-wrap">
                       <div class="col-12 p-2">
                         <input
-                          class="form-control m-0 fs-5 p-2 fw-bold"
+                          class="form-control m-0 p-2 fw-bold"
                           :class="{'is-invalid': error.editName}"
                           v-model="editMenu.name"
                           placeholder="Name"
                           :style="{color: `hsl(208, 7%, 46%, ${editMenu.name === '' ? '50%' : '100%'}) !important`}"
                           type="text"
                           v-if="editingMenuIndex === index"
+                          maxlength="255"
                         />
-                        <div class="fs-5 p-2 fw-bold text-muted" v-else>{{ menu.menu_name }}</div>
+                        <div class="p-2 fw-bold text-muted" v-else>
+                          <p class="line-limit-1 m-0 p-0 mb-1">{{ menu.menu_name }}</p>
+                        </div>
                       </div>
                       <div class="col-4 p-2">
                         <input
-                          class="form-control m-0 p-2 fs-5 fw-bold text-theme-3"
+                          class="form-control m-0 p-2 fw-bold text-theme-3"
                           :class="{'is-invalid': error.editPrice}"
                           v-model="editMenu.price"
                           placeholder="Price"
                           type="number"
                           v-if="editingMenuIndex === index"
                         />
-                        <div class="p-2 fw-bold fs-5 text-theme-3" v-else>{{ menu.menu_price }}฿</div>
+                        <div class="p-2 fw-bold text-theme-3" v-else>{{ menu.menu_price }}฿</div>
                       </div>
                       <div class="col-4 p-2" style="color: #fc8845">
                         <input
-                          class="form-control m-0 p-2 fs-5 fw-bold"
+                          class="form-control m-0 p-2 fw-bold"
                           :class="{'is-invalid': error.editDiscount}"
                           style="color: #fc8845"
                           v-model="editMenu.discount"
@@ -203,7 +208,7 @@
                           v-if="editingMenuIndex === index"
                         />
                         <div
-                          class="p-2 fw-bold fs-5"
+                          class="p-2 fw-bold"
                           style="white-space: nowrap"
                           v-if="editingMenuIndex !== index && menu.member_price"
                         >
@@ -218,22 +223,22 @@
                         v-show="editingMenuIndex !== index"
                         @click="editing(menu); editingMenuIndex = index"
                       >
-                        <i class="fas fa-pen text-muted fs-5"></i>
+                        <i class="fas fa-pen text-muted fs-5 mt-2"></i>
                       </span>
                       <span
                         class="clickable"
                         v-show="editingMenuIndex === index"
                         @click="editingMenuIndex = -1; error.editName = false; error.editPrice = false; error.editDiscount = false; error.editImageFile = false"
                       >
-                        <i class="fas fa-xmark text-muted fs-3"></i>
+                        <i class="fas fa-xmark text-muted fs-3 mt-2"></i>
                       </span>
-                      <div v-if="editingMenuIndex === index">
+                      <div class="m-1" v-if="editingMenuIndex === index">
                         <button
-                          class="btn btn-info text-light me-2 fw-bold border-2"
+                          class="btn btn-outline-secondary border-2 me-2 fw-bold border-2"
                           @click="saveEdit()"
                         >Save</button>
                         <button
-                          class="btn btn-danger fw-bold"
+                          class="btn btn-danger fw-bold border-2"
                           data-bs-toggle="modal"
                           data-bs-target="#confirmDeleteModal"
                           @click="deleteMenu.name = menu.menu_name; deleteMenu.id = menu.menu_id"
@@ -255,6 +260,7 @@
                         :class="{'is-invalid': error.newName}"
                         v-model="newMenu.name"
                         placeholder="Name"
+                        maxlength="255"
                       />
                     </div>
                     <div class="col-6 mb-3 pe-3">
@@ -264,6 +270,7 @@
                         :class="{'is-invalid': error.newPrice}"
                         v-model="newMenu.price"
                         placeholder="Price"
+                        maxlength="100"
                       />
                     </div>
                     <div class="col-6 mb-4">
@@ -283,6 +290,7 @@
                         :class="{'is-invalid': error.newImageFile}"
                         accept="image/*"
                         @change="chooseNewImage"
+                        ref="newImageFile"
                       />
                     </div>
                     <div
@@ -292,7 +300,7 @@
                       <img
                         :src="imageDecode(newMenu.imageFile)"
                         class="card-img-top rounded border"
-                        style="height: 256px; width: 256px; object-fit: cover"
+                        style="height: 196px; width: 196px; object-fit: cover"
                       />
                       <div class="form-text">Image will display square (1:1).</div>
                     </div>
@@ -313,15 +321,15 @@
     </div>
     <div class="modal fade" id="confirmDeleteModal" tabindex="1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fw-bold text-muted">Confirm Delete</h5>
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-theme-2 border-0">
+            <h5 class="modal-title fw-bold text-light">Confirm Delete</h5>
           </div>
-          <div class="modal-body">
+          <div class="modal-body border-0">
             Are you sure to delete "{{ deleteMenu.name.slice(0, 21).trim() }}{{
             deleteMenu.name.length > 20 ? '...' : '' }}"?
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer border-0">
             <button
               type="button"
               class="btn btn-outline-secondary border-2 fw-bold"
@@ -449,6 +457,7 @@ export default {
             this.newMenu.price = "";
             this.newMenu.discount = "";
             this.newMenu.imageFile = "";
+            this.$refs["newImageFile"].value = "";
           })
           .catch((err) => {
             console.log(err);

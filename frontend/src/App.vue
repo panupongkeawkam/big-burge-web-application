@@ -11,8 +11,8 @@ export default {
   name: "App",
   data() {
     return {
-      account: null
-    }
+      account: null,
+    };
   },
   methods: {
     async onAuthChange() {
@@ -21,8 +21,8 @@ export default {
         .then((res) => {
           this.account = res.data.account;
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          localStorage.removeItem("token");
         });
     },
   },

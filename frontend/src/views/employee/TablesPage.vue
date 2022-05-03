@@ -24,7 +24,7 @@
                   >TABLES</span>
                 </span>
               </div>
-              <div class="my-3 clickable">
+              <div class="my-3 clickable" @click="clearAllInterval()">
                 <router-link
                   class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
                   to="/manager/menus"
@@ -36,7 +36,7 @@
                   >MENUS</span>
                 </router-link>
               </div>
-              <div class="my-3 clickable">
+              <div class="my-3 clickable" @click="clearAllInterval()">
                 <router-link
                   class="d-flex flex-column justify-content-center align-items-center text-decoration-none"
                   to="/manager/profile"
@@ -168,7 +168,7 @@
                 "
                   :class="{
                   clickable: table.table_status === 'not_ready',
-                  'selected-table': displayOrderIndex === index && table.table_status === 'not_ready',
+                  'selected-table': displayOrderIndex === index && table.table_status === 'not_ready'
                 }"
                   :key="'table' + table.table_id"
                 >
@@ -182,27 +182,17 @@
                       v-if="table.queue"
                       class="bg-danger px-4 mb-2 d-flex justify-content-center align-items-center fw-bold text-white rounded-pill"
                     >Q{{ table.queue }}</div>
-                    <span>
-                      <i
-                        v-if="table.status === 'created'"
-                        class="fas fa-clipboard-list"
-                        style="font-size: 2em; color: #39c8ef"
-                      ></i>
-                      <i
-                        v-else-if="table.status === 'pending'"
-                        class="fas fa-clock"
-                        style="font-size: 2em; color: #fad945"
-                      ></i>
-                      <i
-                        v-else-if="table.status === 'served'"
-                        class="fas fa-utensils"
-                        style="font-size: 2em; color: #31d475"
-                      ></i>
-                      <i
-                        v-else-if="table.status === 'billing'"
-                        class="fas fa-file-invoice-dollar"
-                        style="font-size: 2em; color: #fc8845"
-                      ></i>
+                    <span v-show="table.status === 'created'">
+                      <i class="fas fa-clipboard-list" style="font-size: 2em; color: #39c8ef"></i>
+                    </span>
+                    <span v-show="table.status === 'pending'">
+                      <i class="fas fa-clock" style="font-size: 2em; color: #fad945"></i>
+                    </span>
+                    <span v-show="table.status === 'served'">
+                      <i class="fas fa-utensils" style="font-size: 2em; color: #31d475"></i>
+                    </span>
+                    <span v-show="table.status === 'billing'">
+                      <i class="fas fa-file-invoice-dollar" style="font-size: 2em; color: #fc8845"></i>
                     </span>
                   </div>
                   <div class="d-flex flex-column fs-5">
@@ -253,38 +243,20 @@
               ref="tableInfoBody"
             >
               <div ref="tableInfoStatus">
-                <div
-                  class="d-flex align-items-center pb-4 m-0"
-                  v-if="displayTable.status === 'created'"
-                >
-                  <span>
+                <div class="d-flex align-items-center">
+                  <span v-show="displayTable.status === 'created'">
                     <i class="fas fa-clipboard-list me-2" style="font-size: 1.5em; color: #39c8ef"></i>
                     <span class="fw-bold text-muted">Check-in</span>
                   </span>
-                </div>
-                <div
-                  class="d-flex align-items-center pb-4"
-                  v-else-if="displayTable.status === 'pending'"
-                >
-                  <span>
+                  <span v-show="displayTable.status === 'pending'">
                     <i class="fas fa-clock me-2" style="font-size: 1.5em; color: #fad945"></i>
                     <span class="fw-bold text-muted">Waiting</span>
                   </span>
-                </div>
-                <div
-                  class="d-flex align-items-center pb-4"
-                  v-else-if="displayTable.status === 'served'"
-                >
-                  <span>
+                  <span v-show="displayTable.status === 'served'">
                     <i class="fas fa-utensils me-2" style="font-size: 1.5em; color: #31d475"></i>
                     <span class="fw-bold text-muted">Served</span>
                   </span>
-                </div>
-                <div
-                  class="d-flex align-items-center pb-4"
-                  v-else-if="displayTable.status === 'billing'"
-                >
-                  <span>
+                  <span v-show="displayTable.status === 'billing'">
                     <i
                       class="fas fa-file-invoice-dollar me-2"
                       style="font-size: 1.5em; color: #fc8845"
@@ -304,7 +276,9 @@
                   v-for="item in displayOrderItems"
                   :key="'item' + item.item_no"
                 >
-                  <div class="col-11 fs-5 text-theme-3">{{ item.menu_name }}</div>
+                  <div class="col-11 fw-bold text-theme-3">
+                    <p class="line-limit-2 p-0 m-0">{{ item.menu_name }}</p>
+                  </div>
                   <div class="col-1 fw-bold text-muted">x{{ item.amount }}</div>
                 </div>
               </div>
@@ -318,7 +292,7 @@
                       class="fw-bold text-muted"
                       style="font-size: 0.8em; opacity: 0.75"
                     >Customer Name</span>
-                    <span class="fs-5 fw-bold text-muted">{{ displayCustomer.full_name }}</span>
+                    <span class="fs-5 fw-bold text-theme-3">{{ displayCustomer.full_name }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 border mb-2"
@@ -328,7 +302,9 @@
                       class="fw-bold text-muted"
                       style="font-size: 0.8em; opacity: 0.75"
                     >Check-in Time</span>
-                    <span class="fs-5 fw-bold text-muted">{{ displayCustomer.check_in }}</span>
+                    <span
+                      class="fs-5 fw-bold text-theme-3"
+                    >{{ displayCustomer.check_in ? displayCustomer.check_in.split(' ')[1] : '-' }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 border me-2 mb-2"
@@ -338,7 +314,7 @@
                       class="fw-bold text-muted"
                       style="font-size: 0.8em; opacity: 0.75"
                     >Item Amount</span>
-                    <span class="fs-3 fw-bold text-muted">{{ displayTable.quantity_item }}</span>
+                    <span class="fs-3 fw-bold text-theme-3">{{ displayTable.quantity_item }}</span>
                   </div>
                   <div
                     class="d-flex flex-column px-4 py-3 border mb-2"
@@ -346,31 +322,39 @@
                   >
                     <span class="fw-bold text-muted" style="font-size: 0.8em; opacity: 0.75">Total</span>
                     <span
-                      class="fs-3 fw-bold text-muted"
+                      class="fs-3 fw-bold text-theme-3"
                     >{{ displayTable.total_price ? displayTable.total_price.toFixed(2) : '0.00' }}฿</span>
                   </div>
                 </div>
                 <div class="d-flex justify-content-end pe-4">
                   <button
-                    class="btn btn-lg text-light btn-info me-2 fw-bold border-2"
+                    class="btn px-4 text-light btn-info me-2 fw-bold border-2"
                     style="opacity: 0"
                   >Emtpy Button</button>
                   <button
-                    class="btn btn-lg text-light btn-info me-2 fw-bold border-2"
-                    v-if="displayTable.status === 'billing'"
+                    class="btn px-4 text-light bg-theme-3 me-2 fw-bold border-2"
+                    v-show="displayTable.status === 'billing'"
                     @click="completeOrder()"
-                  >Finish</button>
+                  >
+                    <i class="fa-solid fa-square-check me-2"></i>
+                    Finish
+                  </button>
                   <button
-                    class="btn btn-lg text-light btn-warning me-2 fw-bold border-2"
-                    v-if="displayTable.status === 'pending'"
+                    class="btn px-4 text-light bg-theme-3 me-2 fw-bold border-2"
+                    v-show="displayTable.status === 'pending'"
                     @click="serveOrder()"
-                  >Serve</button>
+                  >
+                    <i class="fas fa-bell-concierge me-2"></i>
+                    Serve
+                  </button>
                   <button
-                    class="btn btn-lg btn-danger text-light border-2 fw-bold"
-                    v-if="['created', 'pending'].includes(displayTable.status)"
+                    class="btn px-4 btn-danger text-light border-2 fw-bold"
+                    v-show="['created', 'pending'].includes(displayTable.status)"
                     data-bs-toggle="modal"
                     data-bs-target="#cancelOrderModal"
-                  >Cancel</button>
+                  >
+                    <i class="fas fa-ban me-2"></i>Cancel
+                  </button>
                 </div>
               </section>
             </div>
@@ -380,16 +364,16 @@
     </div>
     <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fw-bold text-muted">Cancel Order</h5>
+        <div class="modal-content shadow border-0">
+          <div class="modal-header bg-theme-2 border-0">
+            <h5 class="modal-title fw-bold text-light">Cancel Order</h5>
           </div>
-          <div class="modal-body">
+          <div class="modal-body border-0">
             Are you sure to cancel order for 'Table {{ displayTable.table_id }}'?
             <br />
             <span class="text-danger" style="font-size: .9em">Warning: This change can't turned back</span>
           </div>
-          <div class="modal-footer">
+          <div class="modal-footer border-0">
             <button
               type="button"
               class="btn btn-outline-secondary border-2 fw-bold"
@@ -424,6 +408,8 @@ export default {
       displayTable: {},
       displayOrderItems: [],
       displayCustomer: {},
+      overviewInterval: "",
+      infoInterval: "",
       filter: "",
       queue: 0,
     };
@@ -434,6 +420,7 @@ export default {
         return;
       }
 
+      clearInterval(this.infoInterval);
       axios
         .get(`http://localhost:3000/order/${table.order_id}`)
         .then((res) => {
@@ -449,8 +436,25 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+
+      if (table.status === "created") {
+        this.infoInterval = setInterval(() => {
+          axios
+            .get(`http://localhost:3000/order/${table.order_id}`)
+            .then((res) => {
+              this.displayOrderItems = res.data.orderItems;
+              this.displayTable = this.tables.find(
+                (val) => val.table_id === table.table_id
+              );
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }, 1000);
+      }
     },
     hideInfo() {
+      clearInterval(this.infoInterval);
       this.displayTable = {};
       this.displayOrderItems = [];
       this.displayCustomer = {};
@@ -491,8 +495,7 @@ export default {
     serveOrder() {
       axios
         .put(`http://localhost:3000/order/${this.displayTable.order_id}/serve`)
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -504,8 +507,7 @@ export default {
         .delete(
           `http://localhost:3000/order/${this.displayTable.order_id}/cancel`
         )
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
@@ -517,13 +519,16 @@ export default {
         .post(
           `http://localhost:3000/order/${this.displayTable.order_id}/completed`
         )
-        .then((res) => {
-          console.log(res);
+        .then(() => {
           window.location.reload();
         })
         .catch((err) => {
           console.log(err);
         });
+    },
+    clearAllInterval() {
+      clearInterval(this.overviewInterval);
+      clearInterval(this.infoInterval);
     },
   },
   created() {
@@ -544,6 +549,17 @@ export default {
       .catch((err) => {
         console.log(err);
       });
+
+    this.overviewInterval = setInterval(() => {
+      axios
+        .get("http://localhost:3000/tables")
+        .then((res) => {
+          this.tables = res.data.tables;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }, 1000);
   },
   computed: {
     filteredTables() {

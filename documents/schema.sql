@@ -22,7 +22,7 @@ VALUES
   ), 
   (
     2, 'Somsak_Nokaew', 'Somsak2321', 
-    'employee','SomSak', 'Nokaew', '0909012321'
+    'employee','Somsak', 'Nokaew', '0909012321'
   ),
   (
 	3, 'Sukron_Muu', 'Sukron4234',
@@ -46,9 +46,7 @@ CREATE TABLE `serviced_customer`(
 INSERT INTO `serviced_customer` 
 VALUES 
   (1, null, "2022-02-02 15:24:36", "2022-01-02 18:47:21"), 
-  (2, 3, "2022-04-06 16:43:24", "2022-04-06 17:47:31"), 
-  (3, 4, "2022-04-18 13:23:16", null), 
-  (4, null, "2022-04-18 14:01:43", null);
+  (2, 3, "2022-04-06 16:43:24", "2022-04-06 17:47:31");
 
 DROP TABLE IF EXISTS `employee`;
 CREATE TABLE `employee` (
@@ -117,14 +115,6 @@ VALUES
    (
     2, '2022-04-06 16:48:21', '2022-04-06 17:02:56',
 	3, 225, 'completed', 2, 4
-   ),
-   (
-    3, '2022-04-18 13:27:04', '2022-04-18 13:43:21',
-    3, 355, 'served', 3, 3
-   ),
-   (
-	4, '2022-04-18 14:20:43', null,
-    4, 400, 'pending', 4, 4
    );
 
 DROP TABLE IF EXISTS `table`;
@@ -137,8 +127,8 @@ INSERT INTO `table`
 VALUES 
   (1, 'ready'), 
   (2, 'ready'), 
-  (3, 'not_ready'), 
-  (4, 'not_ready'), 
+  (3, 'ready'), 
+  (4, 'ready'), 
   (5, 'ready'), 
   (6, 'ready'), 
   (7, 'ready'), 
@@ -170,10 +160,7 @@ VALUES
   (1, 100.00, 4, 400.00, 1, 1),
   (2, 150.00, 2, 300.00, 1, 2),
   (3, 65.00, 1, 65.00, 2, 1),
-  (4, 80.00, 2, 160.00, 2, 3),
-  (5, 140.00, 2, 280.00, 3, 2),
-  (6, 75.00, 1, 75.00, 3, 4),
-  (7, 100.00, 4, 400.00, 4, 1);
+  (4, 80.00, 2, 160.00, 2, 3);
 
 DROP TABLE IF EXISTS `receipt`;
 CREATE TABLE `receipt` (
@@ -211,16 +198,25 @@ CREATE TABLE `menu` (
 INSERT INTO `menu` 
 VALUES 
   (
-    1, 'Fried rice', 100.00, 'ready', '2020-04-02', null, 80.00, null
+    1, 'Cup of Ice', 3.00, 'ready', '2020-04-02', '/images/menu_1651596019878_glass-with-ice-soda-cup-q1yMx63-600.jpg', null, null
   ), 
   (
-    2, 'Sour prawn soup', 150.00, 'ready', '2020-04-03', null, 140.00, null
+    2, 'Coca Cola', 19.00, 'ready', '2020-04-03', '/images/menu_1651595954493_coke-soda-q13q2x2-600.jpg', null, null
   ), 
   (
-    3, 'Fried chicken', 80.00, 'ready', '2020-04-03', null, 65.00, null 
+    3, 'Parmesan Spaghetti', 140.00, 'ready', '2020-04-03', '/images/menu_1651595932850_294-2948315_spagetti-aglio-olio-spaghetti-aglio-e-olio.png', 130.00, null 
+  ),
+  (
+    4, 'Mixed Cheese Burger (Checken, meat, beacon)', 289.00, 'ready', '2020-04-03', '/images/menu_1651595658587_burger_sandwich_PNG4135.png', null, null 
+  ),
+  (
+    5, 'Pizza with Pepper Roni & Mushroom', 479.00, 'ready', '2020-04-04', '/images/menu_1651595767583_delicious-italian-food_1147-165.png', 419.00, null
   ), 
   (
-    4, 'Charcoal-boiled pork neck', 90.00, 'ready', '2020-04-04', null, 75.00, null
+    6, 'French Fries', 79.00, 'ready', '2020-04-04', '/images/menu_1651595810068_585abfc54f6ae202fedf2935.png', null, null
+  ), 
+  (
+    7, 'Mixed Salad With Chicken Breast', 90.00, 'ready', '2020-04-05', '/images/menu_1651595877196_grilled-chicken-salad-png-19.png', 75.00, null
   );
 
 DROP TABLE IF EXISTS `token`;

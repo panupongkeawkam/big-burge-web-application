@@ -16,11 +16,11 @@
         </div>
       </div>
 
-      <!-- order list -->
       <div class="row" v-if="order.quantity_item === 0">
         <span class="fs-3 fw-bold d-flex justify-content-center py-5" style="opacity: .3">No Order</span>
       </div>
 
+      <!-- order list -->
       <div
         class="row py-2 px-0 rounded bg-light shadow-sm mx-1 my-2"
         v-for="item in orderItems"
@@ -59,10 +59,7 @@
       </div>
     </section>
 
-    <section
-      class="row py-3 px-2 bottom-0 position-sticky shadow rounded-3-top pb-5"
-      style="background: hsl(0, 0%, 100%, 80%); backdrop-filter: blur(4px)"
-    >
+    <section class="row py-3 px-2 bottom-0 position-sticky shadow rounded-3-top pb-5 bg-light">
       <div class="col-12 d-flex justify-content-between mb-4">
         <span class="fw-bold text-muted fs-5">Total</span>
         <span
@@ -83,13 +80,13 @@
 
     <!-- confirm clear modal -->
     <div class="modal fade" id="confirmClearModal" tabindex="1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fw-bold text-muted">Confirm Clear Order</h5>
+      <div class="modal-dialog modal-dialog-centered px-3">
+        <div class="modal-content shadow border-0">
+          <div class="modal-header bg-theme-3 border-0">
+            <h5 class="modal-title fw-bold text-light">Confirm Clear Order</h5>
           </div>
-          <div class="modal-body">Are you sure to delete all item?</div>
-          <div class="modal-footer">
+          <div class="modal-body border-0">Are you sure to delete all item?</div>
+          <div class="modal-footer border-0">
             <button
               type="button"
               class="btn btn-outline-secondary border-2 fw-bold"
@@ -126,9 +123,11 @@ export default {
       return this.menus.find((val) => val.menu_id === menuId).menu_name;
     },
     getImageFileName(menuId) {
-      var image_file_path = this.menus.find((val) => val.menu_id === menuId).image_file_path
+      var image_file_path = this.menus.find(
+        (val) => val.menu_id === menuId
+      ).image_file_path;
       if (!image_file_path) {
-        return `http://localhost:3000/image-not-found.png`
+        return `http://localhost:3000/image-not-found.png`;
       }
       return `http://localhost:3000${image_file_path}`;
     },
@@ -156,6 +155,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload()
         });
     },
     increaseItem(item) {
@@ -171,6 +171,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload()
         });
     },
     deleteItem(item) {
@@ -188,6 +189,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload()
         });
     },
     clearItem() {
@@ -200,6 +202,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload()
         });
     },
     confirmOrder() {
@@ -213,6 +216,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload()
         });
     },
   },
@@ -228,6 +232,7 @@ export default {
       })
       .catch((err) => {
         console.log(err);
+          window.location.reload()
       });
   },
   mounted() {

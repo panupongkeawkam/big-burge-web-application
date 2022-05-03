@@ -1,5 +1,5 @@
 <template>
-  <div class="container" ref="container">
+  <div class="container pb-5" ref="container">
     <div class="row shadow-sm py-3 position-sticky bg-theme-3" style="z-index: 1">
       <div class="col-12 pb-2">
         <h3 class="fw-bold text-light">Menus</h3>
@@ -47,6 +47,10 @@
     </div>
 
     <!-- menu list -->
+    <div class="row" v-if="sortedMenus.length === 0">
+      <span class="fs-3 fw-bold d-flex justify-content-center py-5" style="opacity: .3">No Result</span>
+    </div>
+
     <div
       class="row py-2 px-0 rounded bg-light shadow-sm mx-1 my-2"
       v-for="menu in sortedMenus"
@@ -139,6 +143,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload();
         });
     },
     addNewItem(menu) {
@@ -162,6 +167,7 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+          window.location.reload();
         });
     },
   },
@@ -205,6 +211,7 @@ export default {
       })
       .catch((err) => {
         console.log(err);
+        window.location.reload();
       });
   },
   mounted() {

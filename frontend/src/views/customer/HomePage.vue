@@ -50,6 +50,7 @@
               class="form-control py-2 mb-3"
               placeholder="Username"
               v-model="username"
+              @focus="error = false"
               :class="{'border border-danger': error}"
             />
           </div>
@@ -59,6 +60,7 @@
               class="form-control py-2"
               placeholder="Password"
               v-model="password"
+              @focus="error = false"
               :class="{'border border-danger': error}"
             />
           </div>
@@ -141,8 +143,8 @@ export default {
         .then(() => {
           this.$router.push(`/table/${this.tableId}/menu`);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          this.error = true
         });
     },
   },

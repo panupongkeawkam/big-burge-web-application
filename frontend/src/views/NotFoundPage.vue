@@ -4,7 +4,7 @@
       class="container bg-theme-3 d-flex flex-column justify-content-center align-items-center"
       ref="container"
     >
-      <img src="../assets/svgs/404-not-found.svg" style="width: 50%" alt />
+      <img src="../assets/svgs/404-not-found.svg" class="w-50" alt />
       <span
         class="fs-1 fw-bold text-light mt-5 mb-3 text-center px-5"
       >Ops!, You looking for the wrong way</span>

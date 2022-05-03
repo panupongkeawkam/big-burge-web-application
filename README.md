@@ -1,1 +1,1 @@
-# restaurant-managerment-web-application
+# Restaurant Managerment Web Application

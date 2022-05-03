@@ -3,7 +3,7 @@ const pool = require('../config')
 
 router = express.Router()
 
-function formatDate(dateFormat, today=false) {
+function formatDate(dateFormat, today = false) {
   var datetime = new Date(dateFormat)
   var date = `${datetime.getFullYear()}/${((datetime.getMonth() + 1) + 1000).toString().slice(2)}/${(datetime.getDate() + 1000).toString().slice(2)}`
   var time = `${(datetime.getHours() + 1000).toString().slice(2)}:${(datetime.getMinutes() + 1000).toString().slice(2)}:${(datetime.getSeconds() + 1000).toString().slice(2)}`
@@ -16,9 +16,9 @@ router.post('/table/:tableId/login', async (req, res) => {
   // validation then create new order and serviced_customer
   const conn = await pool.getConnection()
   await conn.beginTransaction()
-  
+
   try {
-    const [users, field] = await conn.query(
+    const [accounts, field] = await conn.query(
       `SELECT * 
       FROM customer_member
       JOIN \`account\`
@@ -26,26 +26,31 @@ router.post('/table/:tableId/login', async (req, res) => {
       WHERE username = ? AND password = ?`,
       [req.body.username, req.body.password]
     )
-    if (users.length > 0) {
-      const [row1, field1] = await conn.query(
-        `INSERT INTO serviced_customer (account_id, check_in)
+
+    if (accounts.length == 0) {
+      await conn.rollback()
+      return res.status(500).send(err)
+    }
+
+    const [row1, field1] = await conn.query(
+      `INSERT INTO serviced_customer (account_id, check_in)
         VALUES(?,NOW())`,
-        [users[0].account_id]
-      )
+      [accounts[0].account_id]
+    )
 
-      const [row2, field2] = await conn.query(
-        `INSERT INTO \`order\` (status, serviced_id, table_id, quantity_item, total_price)
+    const [row2, field2] = await conn.query(
+      `INSERT INTO \`order\` (status, serviced_id, table_id, quantity_item, total_price)
         VALUES ('created', ?, ?, 0, 0.00)`,
-        [row1.insertId, req.params.tableId]
-      )
+      [row1.insertId, req.params.tableId]
+    )
 
-      const [row3, field3] = await conn.query(
-        `UPDATE \`table\`
+    const [row3, field3] = await conn.query(
+      `UPDATE \`table\`
         SET \`status\` = 'not_ready'
         WHERE table_id = ?`,
-        [req.params.tableId]
-      )
-    }
+      [req.params.tableId]
+    )
+
     await conn.commit()
     res.status(200).send()
   }

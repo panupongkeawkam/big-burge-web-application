@@ -27,13 +27,13 @@ function formatDate(dateFormat) {
   return dateFormat;
 }
 
-function generateToken(){
+function generateToken() {
   const result = [];
-    const characters = '*/=-$#!@^&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < 100; i++) {
-      result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
-   }
-   return result.join('');
+  const characters = '*/=-$#!@^&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (var i = 0; i < 100; i++) {
+    result.push(characters.charAt(Math.floor(Math.random() * characters.length)));
+  }
+  return result.join('');
 }
 
 // employee login
@@ -43,12 +43,15 @@ router.post('/manager/login', async (req, res) => {
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
-    const [[user]] = await conn.query(
+    const [[account]] = await conn.query(
       `SELECT * FROM account
-      WHERE username = ? AND password = ?`,
-      [username, password]
+      JOIN employee
+      USING (account_id)
+      WHERE username = ? AND password = ? AND role = ?`,
+      [username, password, 'service_staff']
     )
-    if (!user) {
+
+    if (!account) {
       await conn.rollback()
       return res.status(500).send(err)
     }
@@ -57,14 +60,14 @@ router.post('/manager/login', async (req, res) => {
     let tempDate = new Date()
     let endDate = new Date(tempDate.setHours(tempDate.getHours() + 18))
     const token = generateToken()
-    const[users, field2] = await conn.query(
+    const [accounts, field2] = await conn.query(
       `INSERT INTO token (token , start_date, end_date, account_id)
       VALUES(?, ?, ?, ?)`,
-      [token, today, endDate, user.account_id]
+      [token, today, endDate, account.account_id]
     )
 
     await conn.commit()
-    res.json({token: token})
+    res.json({ token: token })
   }
   catch (err) {
     await conn.rollback()
@@ -77,7 +80,7 @@ router.post('/manager/login', async (req, res) => {
 
 // add middle ware
 router.get('/manager/account', isLoggedIn, async (req, res) => {
-  res.json({ account: req.user })
+  res.json({ account: req.account })
 })
 
 // get all menu
@@ -460,8 +463,50 @@ router.delete('/menu/:menuId', async (req, res) => {
 
 // update password
 router.put('/account/:accountId/password', async (req, res) => {
-  var body = req.body
-  res.status(200).send()
+  var password = req.body.password
+  const conn = await pool.getConnection()
+  await conn.beginTransaction()
+  
+  try {
+    const [row, field] = await conn.query(
+      `UPDATE account
+      SET password = ?
+      WHERE account_id = ?`,
+      [password, req.params.accountId]
+    )
+    await conn.commit()
+    res.status(200).send()
+  }
+  catch (err) {
+    await conn.rollback()
+    res.status(500).send(err)
+  }
+  finally {
+    conn.release()
+  }
+})
+
+router.delete('/manager/logout', async (req, res) => {
+  let authorization = req.headers.authorization
+  let [secret, token] = authorization.split(' ')
+  const conn = await pool.getConnection()
+  await conn.beginTransaction()
+  try {
+    const[row, field] = await conn.query(
+      `DELETE FROM token
+      WHERE token = ?`,
+      [token]
+    )
+    await conn.commit()
+    res.status(200).send()
+  }
+  catch (err) {
+    await conn.rollback()
+    res.status(500).send(err)
+  }
+  finally {
+    conn.release()
+  }
 })
 
 exports.router = router

@@ -89,9 +89,6 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  console.log('from: \n', from)
-  console.log('to: \n', to)
-
   if (to.meta.role === 'manager' && to.params.login !== 'required') {
     var token = localStorage.getItem('token')
     await axios
@@ -105,7 +102,6 @@ router.beforeEach(async (to, from, next) => {
         if (!account) {
           next({ name: 'ManagerLogin', params: { login: 'required' } })
         } else if (to.name === 'Manager' || to.name === 'ManagerLogin') {
-          console.log('yes')
           next({ name: 'ManagerTables' })
         }
       })

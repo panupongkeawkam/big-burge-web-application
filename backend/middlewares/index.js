@@ -32,13 +32,15 @@ async function isLoggedIn(req, res, next) {
             await conn.commit()
             return res.json({account: null})
         }
-        const [user, field3] = await conn.query(
+        const [accounts, field3] = await conn.query(
             `SELECT *
             FROM account
+            JOIN employee
+            USING (account_id)
             WHERE account_id = ?`,
             [token.account_id]
         )
-        req.user = user[0]
+        req.account = accounts[0]
         await conn.commit()
         next()
     }
