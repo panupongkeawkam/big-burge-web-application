@@ -122,8 +122,10 @@ export default {
         return;
       }
 
-      var price =
-        this.customer.account_id === null ? menu.menu_price : menu.member_price;
+      var price = menu.menu_price;
+      if (this.customer.account_id) {
+        price = menu.member_price ? menu.member_price : menu.menu_price;
+      }
 
       this.addNewItem({
         menu_id: menu.menu_id,
