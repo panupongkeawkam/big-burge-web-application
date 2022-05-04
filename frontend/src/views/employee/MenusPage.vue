@@ -221,7 +221,9 @@
                       <span
                         class="clickable"
                         v-show="editingMenuIndex !== index"
-                        @click="editing(menu); editingMenuIndex = index"
+                        data-bs-toggle="modal"
+                        :data-bs-target="hasServiceTable ? '#editWarningModal' : '#'"
+                        @click="editingMenuIndex = index; editing(menu)"
                       >
                         <i class="fas fa-pen text-muted fs-5 mt-2"></i>
                       </span>
@@ -345,6 +347,27 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="editWarningModal" tabindex="1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-theme-2 border-0">
+            <h5 class="modal-title fw-bold text-light">Edit Warning</h5>
+            <span data-bs-dismiss="modal" class="clickable">
+              <i class="fas fa-xmark fs-5 text-light"></i>
+            </span>
+          </div>
+          <div class="modal-body border-0">
+            <span class="text-warning me-2">
+              <i class="fas fa-triangle-exclamation me-1"></i>
+              Warning
+            </span>
+            <br />Cannot edit menu because customer in
+            <b>service</b>, try to clear all order to continue manage.
+          </div>
+          <div class="modal-footer border-0"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -464,7 +487,12 @@ export default {
           });
       }
     },
-    editing(menu) {
+    async editing(menu) {
+      if (this.hasServiceTable) {
+        this.editingMenuIndex = -1;
+        return;
+      }
+
       this.editMenu.id = menu.menu_id;
       this.editMenu.name = menu.menu_name;
       this.editMenu.price = menu.menu_price;
@@ -530,7 +558,7 @@ export default {
           });
       }
     },
-    confirmDelete() {
+    async confirmDelete() {
       axios
         .delete(`http://localhost:3000/menu/${this.deleteMenu.id}`)
         .then((res) => {
@@ -567,12 +595,31 @@ export default {
           .includes(this.searchQuery.trim().toLowerCase())
       );
     },
+    hasServiceTable() {
+      var has = false;
+      for (var table of this.tables) {
+        if (table.table_status === "not_ready") {
+          has = true;
+          break;
+        }
+      }
+      return has;
+    },
   },
   created() {
     axios
       .get("http://localhost:3000/menus")
       .then((res) => {
         this.menus = res.data.menus;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    axios
+      .get("http://localhost:3000/tables")
+      .then((res) => {
+        this.tables = res.data.tables;
       })
       .catch((err) => {
         console.log(err);

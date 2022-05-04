@@ -261,7 +261,7 @@
                             type="button"
                             class="btn btn-outline-secondary border-2 fw-bold"
                             data-bs-dismiss="modal"
-                            @click="oldPassword = ''; newPassword = ''"
+                            @click="oldPassword = ''; newPassword = ''; validation()"
                           >Cancel</button>
                           <button
                             class="btn btn-warning fw-bold text-light border-2"
@@ -403,6 +403,7 @@ export default {
         });
     },
     saveEditPassword() {
+      this.validation()
       if (this.valid) {
         axios
           .put(
