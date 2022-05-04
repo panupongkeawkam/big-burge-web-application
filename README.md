@@ -1,5 +1,5 @@
-# Restaurant Managerment Web Application
-Web application scoped in local restaurant with a 2 side of user, service (customer) and management (employee), with a data warehourse
+# Big Burge | Restaurant Management Web Application
+Web application scoped in local restaurant with a 2 side of user, service (customer) and manage (employee)
 
 > Functions
 * Service side
@@ -8,7 +8,7 @@ Web application scoped in local restaurant with a 2 side of user, service (custo
   * Search & Filter
   * Get Menus Discount (as member)
   * Login (as member)
-* Management side
+* Manage side
   * View & Manage Tables
   * View & Manage Menus
   * Search & Filter
@@ -21,9 +21,9 @@ Web application scoped in local restaurant with a 2 side of user, service (custo
 * MySQL (Database)
 > Guideline
 * Manager path [http://localhost:8080/manager](http://localhost:8080/manager)
-  * Require login and only employee in company can have user
+  * Require login and only employee in company can have account
   * View port available only **desktop**
-* Each service table path (for table No. 1) [http://localhost:8080/table/1/home](http://localhost:8080/table/1/home)<br>
+* Each service table path (for table no. 1) [http://localhost:8080/table/1/home](http://localhost:8080/table/1/home)<br>
   * Path access by table QR code
   * View port available only **mobile device**
 > Developer

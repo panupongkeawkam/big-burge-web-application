@@ -493,26 +493,46 @@ export default {
       return tables;
     },
     serveOrder() {
-      axios
-        .put(`http://localhost:3000/order/${this.displayTable.order_id}/serve`)
-        .then(() => {
+      var xhttp = new XMLHttpRequest();
+
+      xhttp.onreadystatechange = () => {
+        if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status == 200) {
           window.location.reload();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        } else if (
+          xhttp.readyState == XMLHttpRequest.DONE &&
+          xhttp.status !== 200
+        ) {
+          console.log("Error, cannot serve order.");
+        }
+      };
+
+      xhttp.open(
+        "PUT",
+        `http://localhost:3000/order/${this.displayTable.order_id}/serve`,
+        true
+      );
+      xhttp.send();
     },
     cancelOrder() {
-      axios
-        .delete(
-          `http://localhost:3000/order/${this.displayTable.order_id}/cancel`
-        )
-        .then(() => {
+      var xhttp = new XMLHttpRequest();
+
+      xhttp.onreadystatechange = () => {
+        if (xhttp.readyState == XMLHttpRequest.DONE && xhttp.status == 200) {
           window.location.reload();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+        } else if (
+          xhttp.readyState == XMLHttpRequest.DONE &&
+          xhttp.status !== 200
+        ) {
+          console.log("Error, cannot serve order.");
+        }
+      };
+
+      xhttp.open(
+        "DELETE",
+        `http://localhost:3000/order/${this.displayTable.order_id}/cancel`,
+        true
+      );
+      xhttp.send();
     },
     completeOrder() {
       axios
