@@ -50,7 +50,7 @@ router.post('/manager/login', async (req, res) => {
       WHERE username = ? AND password = ? AND role = ?`,
       [username, password, 'service_staff']
     )
-
+    
     if (!account) {
       await conn.rollback()
       return res.status(500).send(err)
