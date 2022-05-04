@@ -50,7 +50,7 @@ router.post('/manager/login', async (req, res) => {
       WHERE username = ? AND password = ? AND role = ?`,
       [username, password, 'service_staff']
     )
-    
+
     if (!account) {
       await conn.rollback()
       return res.status(500).send(err)
@@ -109,54 +109,36 @@ router.get('/tables', async (req, res) => {
   // need all table with order in each table (if exists)
   const conn = await pool.getConnection()
   await conn.beginTransaction()
+  
   try {
-    const [tables, field1] = await conn.query(
-      `SELECT table_id, status AS table_status 
-      FROM \`table\``
+    var [tables, field1] = await conn.query(
+      `SELECT table_id, \`status\` AS table_status
+      FROM \`table\`;`
     )
 
-
-    const [orders, field2] = await conn.query(
-      `SELECT order_id, ordering_time, served_time, quantity_item, total_price, status, serviced_id, table_id AS table_number
-      FROM \`order\`
-      WHERE \`status\` != 'completed'`
-    )
-
-    const [customer, field3] = await conn.query(
-      `SELECT concat(fname, ' ', lname) AS \`full_name\`, serviced_id, table_id
-      FROM serviced_customer
-      JOIN customer_member
-      USING (account_id)
-      JOIN \`account\`
-      USING (account_id)
-      JOIN \`order\`
+    var [orderDetails, field2] = await conn.query(
+      `SELECT t.table_id, t.\`status\` AS table_status, s.serviced_id, o.order_id, o.quantity_item, o.total_price, o.\`status\`, s.check_in, CONCAT(a.fname, ' ', a.lname) AS full_name
+      FROM \`order\` AS o
+      JOIN serviced_customer AS s
       USING (serviced_id)
-      JOIN \`table\`
-      USING (table_id)`
+      JOIN \`table\` AS t
+      USING (table_id)
+      LEFT OUTER JOIN \`account\` AS a
+      USING (account_id)
+      WHERE o.\`status\` != 'completed'`
     )
 
-    var data = []
-    for (var table of tables) {
-      if (table.table_status === 'not_ready') {
-        var order = orders.find(order => order.table_number === table.table_id)
-        for (var cust of customer) {
-          if (cust.table_id === table.table_id) {
-            var fullName = { full_name: cust.full_name }
-          }
-          else {
-            var fullName = { full_name: null }
-          }
-        }
-        delete order.table_number
-        data.push(Object.assign(order, table, fullName))
+    tables = tables.map(table => {
+      var orderDetail = orderDetails.find(val => val.table_id === table.table_id)
+      if (orderDetail) {
+        orderDetail.check_in = formatDate(orderDetail.check_in)
+        return orderDetail
       }
-      else {
-        data.push(table)
-      }
-    }
+      return table
+    })
 
     await conn.commit()
-    res.json({ tables: data })
+    res.json({ tables: tables })
   }
   catch (err) {
     await conn.rollback()
@@ -466,7 +448,7 @@ router.put('/account/:accountId/password', async (req, res) => {
   var password = req.body.password
   const conn = await pool.getConnection()
   await conn.beginTransaction()
-  
+
   try {
     const [row, field] = await conn.query(
       `UPDATE account
@@ -492,7 +474,7 @@ router.delete('/manager/logout', async (req, res) => {
   const conn = await pool.getConnection()
   await conn.beginTransaction()
   try {
-    const[row, field] = await conn.query(
+    const [row, field] = await conn.query(
       `DELETE FROM token
       WHERE token = ?`,
       [token]
