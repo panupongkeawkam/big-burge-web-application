@@ -71,11 +71,6 @@ const routes = [
     component: () => import('../views/customer/BillingPage.vue')
   },
   {
-    path: '/completed',
-    name: 'Completed',
-    component: () => import('../views/customer/CompletedPage.vue')
-  },
-  {
     path: '/404',
     name: 'NotFound',
     component: () => import('../views/NotFoundPage.vue')
@@ -144,6 +139,5 @@ router.beforeEach(async (to, from, next) => {
 
   next()
 })
-
 
 export default router

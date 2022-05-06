@@ -369,7 +369,6 @@ export default {
       this.minimumLength = this.newPassword.length >= 8;
 
       var charCount = 0;
-      var sequenceChar = "";
       for (var c of this.newPassword) {
         if (c.match(lower) || c.match(upper)) {
           charCount = charCount + 1;
@@ -377,7 +376,6 @@ export default {
         if (
           !(c.match(lower) || c.match(upper) || c.match(numbers) || c === "_")
         ) {
-          sequenceChar = sequenceChar.includes(c) ? sequenceChar + c : "";
           this.noSpecial = false;
         }
       }
@@ -403,7 +401,7 @@ export default {
         });
     },
     saveEditPassword() {
-      this.validation()
+      this.validation();
       if (this.valid) {
         axios
           .put(
